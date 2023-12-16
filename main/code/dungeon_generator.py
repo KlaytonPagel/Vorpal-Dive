@@ -10,7 +10,7 @@ class Dungeon:
         self.visible_group = visible_group
         self.generate_rooms()
 
-    #
+    # Choose random places within dungeon size and build rooms_____________________________________
     def generate_rooms(self):
         end_position = None
         for attempt in range(room_attempts):
@@ -50,7 +50,7 @@ class Dungeon:
         # build up walls around rooms and pathways
         self.build_walls()
 
-    # Checks if there are already tiles in any of the spots the room will occupy
+    # Checks if there are already tiles in any of the spots the room will occupy___________________
     def validate_room(self, room_x, room_y, room_width, room_height):
         for h in range(1, room_height):
             for w in range(1, room_width):
@@ -58,7 +58,7 @@ class Dungeon:
                     return False
         return True
 
-    # Create tunnel from the current room to the previously made room
+    # Create tunnel from the current room to the previously made room______________________________
     def create_tunnel(self, start_position, end_position):
         start_x, start_y = start_position
         end_x, end_y = end_position
@@ -95,20 +95,26 @@ class Dungeon:
                 start_x += tile_size
             start_x -= tile_size * (tunnel_width - 1)
 
+    # Check if tiles adjacent to occupied tiles are also occupied, if not put a wall tile down_____
     def build_walls(self):
         for tile in self.occupied_tiles:
+
+            # Check tile to the right
             if (tile[0] + tile_size, tile[1]) not in self.occupied_tiles:
                 Visible((tile[0] + tile_size, tile[1]),
                         '../textures/32X32/Walls/Wall front.png', self.visible_group)
 
+            # check tile to the left
             if (tile[0] - tile_size, tile[1]) not in self.occupied_tiles:
                 Visible((tile[0] - tile_size, tile[1]),
                         '../textures/32X32/Walls/Wall front.png', self.visible_group)
 
+            # check tile above
             if (tile[0], tile[1] + tile_size) not in self.occupied_tiles:
                 Visible((tile[0], tile[1] + tile_size),
                         '../textures/32X32/Walls/Wall front.png', self.visible_group)
 
+            # check tile below
             if (tile[0], tile[1] - tile_size) not in self.occupied_tiles:
                 Visible((tile[0], tile[1] - tile_size),
                         '../textures/32X32/Walls/Wall front.png', self.visible_group)
