@@ -6,9 +6,10 @@ from config import *
 
 # Dungeon class for generating a random dungeon____________________________________________________
 class Dungeon:
-    def __init__(self, visible_group):
+    def __init__(self, visible_group, obstacle_group):
         self.floor_tile_positions = []
         self.visible_group = visible_group
+        self.obstacle_group = obstacle_group
         self.player_start_position = None
         self.generate_rooms()
 
@@ -93,6 +94,7 @@ class Dungeon:
                 start_x += tile_size
             start_x -= tile_size * (tunnel_width - 1)
 
+    # combine all floor tiles into one image and save it___________________________________________
     def build_floors(self):
         # Create a new surface for all floor tiles
         complete_floor_surface = pygame.Surface((dungeon_width, dungeon_height))
@@ -104,12 +106,6 @@ class Dungeon:
             complete_floor_surface.blit(floor_tile_image, (tile[0], tile[1]))
         pygame.image.save(complete_floor_surface, '../complete_floors/complete_floor.png')
 
-        # load that saved image and put it on the screen
-        complete_floor_sprite = pygame.sprite.Sprite()
-        complete_floor_sprite.image = pygame.image.load('../complete_floors/complete_floor.png').convert_alpha()
-        complete_floor_sprite.rect = complete_floor_sprite.image.get_rect(topleft=(0, 7))
-        self.visible_group.add(complete_floor_sprite)
-
     # Check if tiles adjacent to occupied tiles are also occupied, if not put a wall tile down_____
     def build_walls(self):
         for tile in self.floor_tile_positions:
@@ -117,19 +113,19 @@ class Dungeon:
             # Check tile to the right
             if (tile[0] + tile_size, tile[1]) not in self.floor_tile_positions:
                 Visible((tile[0] + tile_size, tile[1]),
-                        '../textures/32X32/Walls/Wall front.png', self.visible_group)
+                        '../textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
 
             # check tile to the left
             if (tile[0] - tile_size, tile[1]) not in self.floor_tile_positions:
                 Visible((tile[0] - tile_size, tile[1]),
-                        '../textures/32X32/Walls/Wall front.png', self.visible_group)
+                        '../textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
 
             # check tile above
             if (tile[0], tile[1] + tile_size) not in self.floor_tile_positions:
                 Visible((tile[0], tile[1] + tile_size),
-                        '../textures/32X32/Walls/Wall front.png', self.visible_group)
+                        '../textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
 
             # check tile below
             if (tile[0], tile[1] - tile_size) not in self.floor_tile_positions:
                 Visible((tile[0], tile[1] - tile_size),
-                        '../textures/32X32/Walls/Wall front.png', self.visible_group)
+                        '../textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
