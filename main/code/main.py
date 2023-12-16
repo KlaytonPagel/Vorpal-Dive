@@ -1,6 +1,7 @@
 import pygame
 from config import *
 from dungeon_generator import Dungeon
+from player import Player
 
 # start pygame_____________________________________________________________________________________
 pygame.init()
@@ -12,7 +13,8 @@ running = True
 visible_group = pygame.sprite.Group()
 
 # create objects___________________________________________________________________________________
-Dungeon(visible_group)
+dungeon = Dungeon(visible_group)
+player = Player(visible_group, dungeon.player_start_position)
 
 
 while running:
@@ -21,5 +23,6 @@ while running:
             running = False
 
     visible_group.draw(screen)
+    player.update()
 
     pygame.display.flip()

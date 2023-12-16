@@ -9,6 +9,7 @@ class Dungeon:
     def __init__(self, visible_group):
         self.floor_tile_positions = []
         self.visible_group = visible_group
+        self.player_start_position = None
         self.generate_rooms()
 
     # Choose random places within dungeon size and build rooms_____________________________________
@@ -42,6 +43,7 @@ class Dungeon:
                 start_position = (room_x + room_width // 2 * tile_size, room_y + room_height // 2 * tile_size)
                 if end_position is not None:
                     self.create_tunnel(start_position, end_position)
+                else: self.player_start_position = start_position
                 end_position = (room_x + room_width // 2 * tile_size, room_y + room_height // 2 * tile_size)
 
         # Place wall and floor images
