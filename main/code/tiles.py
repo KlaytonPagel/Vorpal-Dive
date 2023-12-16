@@ -6,8 +6,7 @@ from config import *
 class Visible(pygame.sprite.Sprite):
     def __init__(self, pos, surf, group, name='default'):
         super().__init__(group)
-        self.image = pygame.image.load(surf)
-        self.image = self.image.convert_alpha()
+        self.image = pygame.image.load(surf).convert_alpha()
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
         self.rect = self.image.get_rect(topleft=pos)
         self.rect = self.rect.inflate(0, -15)

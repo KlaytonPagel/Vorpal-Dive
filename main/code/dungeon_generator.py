@@ -1,4 +1,5 @@
 import random
+import pygame
 from tiles import Visible
 from config import *
 
@@ -6,7 +7,7 @@ from config import *
 # Dungeon class for generating a random dungeon____________________________________________________
 class Dungeon:
     def __init__(self, visible_group):
-        self.occupied_tiles = []
+        self.floor_tile_positions = []
         self.visible_group = visible_group
         self.generate_rooms()
 
@@ -16,8 +17,8 @@ class Dungeon:
         for attempt in range(room_attempts):
 
             # Pick a random point to create a room
-            room_x = random.randint(0, dungeon_width)
-            room_y = random.randint(0, dungeon_height)
+            room_x = random.randint(0, dungeon_width - (max_room_width * tile_size))
+            room_y = random.randint(0, dungeon_height - (max_room_height * tile_size))
 
             # align the room to a grid of tiles based on the tile size
             if room_x % tile_size != 0:
@@ -26,20 +27,16 @@ class Dungeon:
                 room_y -= room_y % tile_size
 
             # randomize the room height and width based off of the defined max and min height and width
-            room_width = random.randint(min_room_width, max_room_width) + 1
-            room_height = random.randint(min_room_height, max_room_height) + 1
+            room_width = random.randint(min_room_width, max_room_width)
+            room_height = random.randint(min_room_height, max_room_height)
 
             # Check if a room will overlap
             if self.validate_room(room_x, room_y, room_width, room_height):
 
                 # Build out the room from the starting position
-                for h in range(1, room_height):
-                    for w in range(1, room_width):
-                        self.occupied_tiles.append((room_x + w * tile_size, room_y + h * tile_size))
-
-                        # place the floor tiles for every room
-                        Visible((room_x + w * tile_size, room_y + h * tile_size),
-                                '../textures/32X32/Floors/Floor 2.png', self.visible_group)
+                for h in range(room_height):
+                    for w in range(room_width):
+                        self.floor_tile_positions.append((room_x + w * tile_size, room_y + h * tile_size))
 
                 # if this is not the first room, create a tunnel to the previous room
                 start_position = (room_x + room_width // 2 * tile_size, room_y + room_height // 2 * tile_size)
@@ -47,14 +44,15 @@ class Dungeon:
                     self.create_tunnel(start_position, end_position)
                 end_position = (room_x + room_width // 2 * tile_size, room_y + room_height // 2 * tile_size)
 
-        # build up walls around rooms and pathways
+        # Place wall and floor images
+        self.build_floors()
         self.build_walls()
 
     # Checks if there are already tiles in any of the spots the room will occupy___________________
     def validate_room(self, room_x, room_y, room_width, room_height):
         for h in range(1, room_height):
             for w in range(1, room_width):
-                if (room_x + w * tile_size, room_y + h * tile_size) in self.occupied_tiles:
+                if (room_x + w * tile_size, room_y + h * tile_size) in self.floor_tile_positions:
                     return False
         return True
 
@@ -73,9 +71,8 @@ class Dungeon:
             # place floor tiles for the tunnel at the defined width
             start_y -= tile_size
             for i in range(tunnel_width):
-                self.occupied_tiles.append((start_x, start_y))
-                Visible((start_x, start_y),
-                        '../textures/32X32/Floors/Floor 2.png', self.visible_group)
+                if (start_x, start_y) not in self.floor_tile_positions:
+                    self.floor_tile_positions.append((start_x, start_y))
                 start_y += tile_size
             start_y -= tile_size * (tunnel_width - 1)
 
@@ -89,32 +86,48 @@ class Dungeon:
             # place floor tiles for the tunnel at the defined width
             start_x -= tile_size
             for i in range(tunnel_width):
-                self.occupied_tiles.append((start_x, start_y))
-                Visible((start_x, start_y),
-                        '../textures/32X32/Floors/Floor 2.png', self.visible_group)
+                if (start_x, start_y) not in self.floor_tile_positions:
+                    self.floor_tile_positions.append((start_x, start_y))
                 start_x += tile_size
             start_x -= tile_size * (tunnel_width - 1)
 
+    def build_floors(self):
+        # Create a new surface for all floor tiles
+        complete_floor_surface = pygame.Surface((dungeon_width, dungeon_height))
+
+        # load all floor tile images and combine all tiles onto one surface
+        floor_tile_image = pygame.image.load('../textures/32X32/Floors/Floor 2.png')
+        floor_tile_image = pygame.transform.scale(floor_tile_image, (tile_size, tile_size))
+        for tile in self.floor_tile_positions:
+            complete_floor_surface.blit(floor_tile_image, (tile[0], tile[1]))
+        pygame.image.save(complete_floor_surface, '../complete_floors/complete_floor.png')
+
+        # load that saved image and put it on the screen
+        complete_floor_sprite = pygame.sprite.Sprite()
+        complete_floor_sprite.image = pygame.image.load('../complete_floors/complete_floor.png').convert_alpha()
+        complete_floor_sprite.rect = complete_floor_sprite.image.get_rect(topleft=(0, 7))
+        self.visible_group.add(complete_floor_sprite)
+
     # Check if tiles adjacent to occupied tiles are also occupied, if not put a wall tile down_____
     def build_walls(self):
-        for tile in self.occupied_tiles:
+        for tile in self.floor_tile_positions:
 
             # Check tile to the right
-            if (tile[0] + tile_size, tile[1]) not in self.occupied_tiles:
+            if (tile[0] + tile_size, tile[1]) not in self.floor_tile_positions:
                 Visible((tile[0] + tile_size, tile[1]),
                         '../textures/32X32/Walls/Wall front.png', self.visible_group)
 
             # check tile to the left
-            if (tile[0] - tile_size, tile[1]) not in self.occupied_tiles:
+            if (tile[0] - tile_size, tile[1]) not in self.floor_tile_positions:
                 Visible((tile[0] - tile_size, tile[1]),
                         '../textures/32X32/Walls/Wall front.png', self.visible_group)
 
             # check tile above
-            if (tile[0], tile[1] + tile_size) not in self.occupied_tiles:
+            if (tile[0], tile[1] + tile_size) not in self.floor_tile_positions:
                 Visible((tile[0], tile[1] + tile_size),
                         '../textures/32X32/Walls/Wall front.png', self.visible_group)
 
             # check tile below
-            if (tile[0], tile[1] - tile_size) not in self.occupied_tiles:
+            if (tile[0], tile[1] - tile_size) not in self.floor_tile_positions:
                 Visible((tile[0], tile[1] - tile_size),
                         '../textures/32X32/Walls/Wall front.png', self.visible_group)
