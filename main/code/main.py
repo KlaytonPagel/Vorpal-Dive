@@ -2,6 +2,7 @@ import pygame
 from config import *
 from dungeon_generator import Dungeon
 from player import Player
+from Debug import debug
 
 # start pygame_____________________________________________________________________________________
 pygame.init()
@@ -42,20 +43,23 @@ class VisibleGroup(pygame.sprite.Group):
 # Declare groups___________________________________________________________________________________
 visible_group = VisibleGroup()
 obstacle_group = pygame.sprite.Group()
+projectile_group = pygame.sprite.Group()
 
 # create objects___________________________________________________________________________________
 dungeon = Dungeon(visible_group, obstacle_group)
-player = Player(visible_group, dungeon.player_start_position, obstacle_group)
+player = Player(visible_group, dungeon.player_start_position, visible_group, obstacle_group, projectile_group)
 
 
 while running:
-    for event in pygame.event.get():
+    event_list = pygame.event.get()
+    for event in event_list:
         if event.type == pygame.QUIT:
             running = False
 
     screen.fill((0, 0, 0))
     visible_group.custom_draw()
-    player.update()
+    player.update(event_list)
+    debug(str(clock.get_fps()))
 
     pygame.display.flip()
 
