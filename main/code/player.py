@@ -1,5 +1,3 @@
-import math
-
 import pygame
 from config import *
 from projectiles import Projectile
@@ -20,7 +18,7 @@ class Player(pygame.sprite.Sprite):
         # Projectile Stuff
         self.shooting = False
         self.can_shoot = True
-        self.shoot_cool_down = fps
+        self.shoot_cooldown = fps
 
         # Define sprite groups
         self.obstacle_group = obstacle_group
@@ -77,8 +75,8 @@ class Player(pygame.sprite.Sprite):
 
         # Shooting cooldown
         if not self.can_shoot:
-            self.shoot_cool_down += projectile_fire_rate
-            if self.shoot_cool_down >= fps:
+            self.shoot_cooldown += projectile_fire_rate
+            if self.shoot_cooldown >= fps:
                 self.can_shoot = True
 
     # if you are shooting then shoot_______________________________________________________________
@@ -91,7 +89,7 @@ class Player(pygame.sprite.Sprite):
                        starting_point, end_point, self.obstacle_group)
 
             self.can_shoot = False
-            self.shoot_cool_down = 0
+            self.shoot_cooldown = 0
 
     # Check for any collisions with the player_____________________________________________________
     def check_collisions(self):

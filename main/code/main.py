@@ -3,6 +3,7 @@ from config import *
 from dungeon_generator import Dungeon
 from player import Player
 from Debug import debug
+from enemy_spawner import EnemySpawner
 
 # start pygame_____________________________________________________________________________________
 pygame.init()
@@ -48,6 +49,7 @@ projectile_group = pygame.sprite.Group()
 # create objects___________________________________________________________________________________
 dungeon = Dungeon(visible_group, obstacle_group)
 player = Player(visible_group, dungeon.player_start_position, visible_group, obstacle_group, projectile_group)
+enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, visible_group)
 
 
 while running:
@@ -59,8 +61,9 @@ while running:
     screen.fill((0, 0, 0))
     visible_group.custom_draw()
     player.update(event_list)
-    debug(str(player.shoot_cool_down))
+    debug(str(clock.get_fps()))
+
+    enemy_spawner.decide_spawn_enemy(player.rect.center)
 
     pygame.display.flip()
-
     clock.tick(fps)

@@ -18,3 +18,6 @@ player_speed = 5
 projectile_speed = 2
 projectile_fire_rate = 1
 projectile_range = 5
+
+# Enemy Spawn Settings_____________________________________________________________________________
+spawn_chance_per_second = 10
