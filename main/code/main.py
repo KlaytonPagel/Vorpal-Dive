@@ -59,7 +59,7 @@ while running:
     screen.fill((0, 0, 0))
     visible_group.custom_draw()
     player.update(event_list)
-    debug(str(clock.get_fps()))
+    debug(str(player.shoot_cool_down))
 
     pygame.display.flip()
 

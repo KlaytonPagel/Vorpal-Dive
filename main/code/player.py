@@ -19,6 +19,8 @@ class Player(pygame.sprite.Sprite):
 
         # Projectile Stuff
         self.shooting = False
+        self.can_shoot = True
+        self.shoot_cool_down = fps
 
         # Define sprite groups
         self.obstacle_group = obstacle_group
@@ -56,25 +58,40 @@ class Player(pygame.sprite.Sprite):
 
     # Update all player function___________________________________________________________________
     def update(self, event_list):
+        # Move the player
         self.player_input(event_list)
         if self.player_direction.magnitude() != 0:
             self.player_direction = self.player_direction.normalize()
         self.rect.center += self.player_direction * player_speed
+
         self.check_collisions()
-        if self.shooting:
-            self.shoot()
+        self.cool_downs()
+        self.shoot()
 
         # update all visible projectiles
         for projectile in self.projectile_group:
             projectile.update()
 
-    # if you are shooting then shoot______________________________________________________________
-    def shoot(self):
-        starting_point = pygame.math.Vector2(screen_width // 2, screen_height // 2)
-        end_point = pygame.math.Vector2(pygame.mouse.get_pos())
+    # all player cool downs________________________________________________________________________
+    def cool_downs(self):
 
-        Projectile((self.visible_group, self.projectile_group), self.rect.center,
-                   starting_point, end_point, self.obstacle_group)
+        # Shooting cooldown
+        if not self.can_shoot:
+            self.shoot_cool_down += projectile_fire_rate
+            if self.shoot_cool_down >= fps:
+                self.can_shoot = True
+
+    # if you are shooting then shoot_______________________________________________________________
+    def shoot(self):
+        if self.shooting and self.can_shoot:
+            starting_point = pygame.math.Vector2(screen_width // 2, screen_height // 2)
+            end_point = pygame.math.Vector2(pygame.mouse.get_pos())
+
+            Projectile((self.visible_group, self.projectile_group), self.rect.center,
+                       starting_point, end_point, self.obstacle_group)
+
+            self.can_shoot = False
+            self.shoot_cool_down = 0
 
     # Check for any collisions with the player_____________________________________________________
     def check_collisions(self):
