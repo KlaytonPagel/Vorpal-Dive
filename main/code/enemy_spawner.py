@@ -21,15 +21,18 @@ class EnemySpawner:
         else:
             Visible(enemy_location, '../textures/Enemy.png', self.visible_group)
 
-    # Decide weather to spawn an enemy or not
+    # Decide weather to spawn an enemy or not______________________________________________________
     def decide_spawn_enemy(self, player_location):
+
+        # enemy spawning cooldown
         if not self.can_spawn:
             self.spawn_cooldown += 1
             if self.spawn_cooldown >= fps:
                 self.can_spawn = True
+
+        # try to spawn an enemy based off of spawn chance in the config
         else:
-            print(random.randint(0, 100/spawn_chance_per_second))
-            if random.randint(0, 100/spawn_chance_per_second) == 0:
+            if random.randint(1, 100/spawn_chance_per_second) == 1:
                 self.spawn_enemy(player_location)
             self.can_spawn = False
             self.spawn_cooldown = 0

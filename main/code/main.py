@@ -61,7 +61,7 @@ while running:
     screen.fill((0, 0, 0))
     visible_group.custom_draw()
     player.update(event_list)
-    debug(str(clock.get_fps()))
+    debug(str(round(clock.get_fps())))
 
     enemy_spawner.decide_spawn_enemy(player.rect.center)
 
