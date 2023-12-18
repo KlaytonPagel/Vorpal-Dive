@@ -45,11 +45,13 @@ class VisibleGroup(pygame.sprite.Group):
 visible_group = VisibleGroup()
 obstacle_group = pygame.sprite.Group()
 projectile_group = pygame.sprite.Group()
+enemy_group = pygame.sprite.Group()
 
 # create objects___________________________________________________________________________________
 dungeon = Dungeon(visible_group, obstacle_group)
-player = Player(visible_group, dungeon.player_start_position, visible_group, obstacle_group, projectile_group)
-enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, visible_group)
+player = Player(visible_group, dungeon.player_start_position, visible_group,
+                obstacle_group, projectile_group, enemy_group)
+enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, visible_group, enemy_group, obstacle_group)
 
 
 while running:
@@ -64,6 +66,7 @@ while running:
     debug(str(round(clock.get_fps())))
 
     enemy_spawner.decide_spawn_enemy(player.rect.center)
+    enemy_group.update(player.rect.center)
 
     pygame.display.flip()
     clock.tick(fps)

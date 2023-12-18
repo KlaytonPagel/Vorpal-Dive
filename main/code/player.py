@@ -5,7 +5,7 @@ from projectiles import Projectile
 
 # A class to create and manage the player character________________________________________________
 class Player(pygame.sprite.Sprite):
-    def __init__(self, group, position, visible_group, obstacle_group, projectile_group):
+    def __init__(self, group, position, visible_group, obstacle_group, projectile_group, enemy_group):
         super().__init__(group)
 
         # Player sprite setup
@@ -24,6 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.obstacle_group = obstacle_group
         self.visible_group = visible_group
         self.projectile_group = projectile_group
+        self.enemy_group = enemy_group
 
     # track all user input for the player__________________________________________________________
     def player_input(self, event_list):
@@ -86,14 +87,14 @@ class Player(pygame.sprite.Sprite):
             end_point = pygame.math.Vector2(pygame.mouse.get_pos())
 
             Projectile((self.visible_group, self.projectile_group), self.rect.center,
-                       starting_point, end_point, self.obstacle_group)
+                       starting_point, end_point, self.obstacle_group, self.enemy_group)
 
             self.can_shoot = False
             self.shoot_cooldown = 0
 
     # Check for any collisions with the player_____________________________________________________
     def check_collisions(self):
-        tolerance = 10
+        tolerance = 5
         if collision:
 
             # Check obstacle collision

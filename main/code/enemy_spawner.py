@@ -1,13 +1,15 @@
 import random
 from config import *
-from tiles import Visible
+from enemy import Enemy
 
 
 # Class to spawn enemies in the dungeon____________________________________________________________
 class EnemySpawner:
-    def __init__(self, spawnable_tiles, visible_group):
+    def __init__(self, spawnable_tiles, visible_group, enemy_group, obstacle_group):
         self.spawnable_tiles = spawnable_tiles
         self.visible_group = visible_group
+        self.enemy_group = enemy_group
+        self.obstacle_group = obstacle_group
 
         self.can_spawn = True
         self.spawn_cooldown = fps
@@ -19,7 +21,7 @@ class EnemySpawner:
                 abs(player_location[1] - enemy_location[1]) <= 10 * tile_size):
             self.spawn_enemy(player_location)
         else:
-            Visible(enemy_location, '../textures/Enemy.png', self.visible_group)
+            Enemy((self.visible_group, self.enemy_group), enemy_location, self.obstacle_group)
 
     # Decide weather to spawn an enemy or not______________________________________________________
     def decide_spawn_enemy(self, player_location):
