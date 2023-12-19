@@ -4,7 +4,7 @@ from config import *
 
 # class for all game projectiles___________________________________________________________________
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, group, position, starting_point, end_point, obstacle_group, enemy_group):
+    def __init__(self, group, position, starting_point, end_point, obstacle_group):
         super().__init__(group)
 
         # Projectile sprite setup
@@ -22,10 +22,12 @@ class Projectile(pygame.sprite.Sprite):
 
         # Groups to check collisions with
         self.obstacle_group = obstacle_group
-        self.enemy_group = enemy_group
 
         # distance the projectile has traveled
         self.projectile_distance = 0
+
+        # projectiles damage
+        self.damage = 10
 
     # update the projectiles position______________________________________________________________
     def update(self):
@@ -51,12 +53,6 @@ class Projectile(pygame.sprite.Sprite):
             for sprite in self.obstacle_group.sprites():
                 if self.rect.colliderect(sprite):
                     self.kill()
-
-            # check enemy collision
-            for sprite in self.enemy_group.sprites():
-                if self.rect.colliderect(sprite):
-                    self.kill()
-                    sprite.kill()
 
     # check if the distance the projectile has traveled exceeds the range__________________________
     def check_distance(self):

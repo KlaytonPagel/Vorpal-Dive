@@ -115,7 +115,7 @@ class Player(pygame.sprite.Sprite):
             end_point = pygame.math.Vector2(pygame.mouse.get_pos())
 
             Projectile((self.visible_group, self.projectile_group), self.rect.center,
-                       starting_point, end_point, self.obstacle_group, self.enemy_group)
+                       starting_point, end_point, self.obstacle_group)
 
             self.can_shoot = False
             self.shoot_cooldown = 0

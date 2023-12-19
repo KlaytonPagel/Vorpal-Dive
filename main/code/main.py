@@ -52,7 +52,7 @@ hud_group = pygame.sprite.Group()
 dungeon = Dungeon(visible_group, obstacle_group)
 player = Player(visible_group, dungeon.player_start_position, screen, visible_group,
                 obstacle_group, projectile_group, enemy_group, hud_group)
-enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, visible_group, enemy_group, obstacle_group)
+enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, visible_group, enemy_group, obstacle_group, projectile_group)
 
 
 while running:

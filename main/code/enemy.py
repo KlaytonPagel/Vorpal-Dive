@@ -3,7 +3,7 @@ from config import *
 
 
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, group, position, obstacle_group):
+    def __init__(self, group, position, obstacle_group, projectile_group):
         super().__init__(group)
 
         # Enemy sprite setup
@@ -13,13 +13,18 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.rect.inflate(0, -10)
         self.enemy_direction = pygame.math.Vector2()
 
+        # enemy health setup
+        self.current_health = 20
+
         self.starting_position = pygame.math.Vector2(position)
         self.position_x, self.position_y = position
 
         self.obstacle_group = obstacle_group
+        self.projectile_group = projectile_group
 
     def update(self, player_position):
         self.enemy_pathfinding(player_position)
+        self.check_projectile_collision()
 
     def enemy_pathfinding(self, player_position):
         # normalize the direction vector so the length of the line doesn't affect enemy speed
@@ -33,12 +38,18 @@ class Enemy(pygame.sprite.Sprite):
 
             # update the floating point variables
             self.rect.x += self.enemy_direction.x * enemy_speed
-            self.check_collisions('horizontal')
+            self.check_obstacle_collisions('horizontal')
             self.rect.y += self.enemy_direction.y * enemy_speed
-            self.check_collisions('vertical')
+            self.check_obstacle_collisions('vertical')
             self.rect.center = (self.position_x, self.position_y)
 
-    def check_collisions(self, direction):
+    # adjust the enemies health
+    def adjust_current_health(self, amount):
+        self.current_health += amount
+        if self.current_health <= 0:
+            self.kill()
+
+    def check_obstacle_collisions(self, direction):
         if collision:
 
             # Check obstacle collision
@@ -54,3 +65,19 @@ class Enemy(pygame.sprite.Sprite):
                     elif self.rect.colliderect(sprite) and self.enemy_direction.y > 0:
                         self.rect.bottom = sprite.rect.top
                 self.position_x, self.position_y = self.rect.center
+
+    def check_projectile_collision(self):
+        if collision:
+
+            # check projectile collision
+            for sprite in self.projectile_group.sprites():
+                if self.rect.colliderect(sprite):
+                    self.adjust_current_health(-10)
+                    sprite.kill()
+                    self.enemy_direction = sprite.projectile_direction
+                    if self.enemy_direction.x != 0:
+                        self.rect.x += self.enemy_direction.x * 20
+                        self.check_obstacle_collisions('horizontal')
+                    if self.enemy_direction.y != 0:
+                        self.rect.y += self.enemy_direction.y * 20
+                        self.check_obstacle_collisions('vertical')
