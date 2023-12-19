@@ -2,6 +2,7 @@ import pygame
 from config import *
 
 
+# class to create enemy sprites____________________________________________________________________
 class Enemy(pygame.sprite.Sprite):
     def __init__(self, group, position, obstacle_group, projectile_group):
         super().__init__(group)
@@ -16,16 +17,20 @@ class Enemy(pygame.sprite.Sprite):
         # enemy health setup
         self.current_health = 20
 
+        # position set up
         self.starting_position = pygame.math.Vector2(position)
         self.position_x, self.position_y = position
 
+        # declaring sprite groups
         self.obstacle_group = obstacle_group
         self.projectile_group = projectile_group
 
+    # update the enemy every frame_________________________________________________________________
     def update(self, player_position):
         self.enemy_pathfinding(player_position)
         self.check_projectile_collision()
 
+    # move towards the player if within range______________________________________________________
     def enemy_pathfinding(self, player_position):
         # normalize the direction vector so the length of the line doesn't affect enemy speed
         if (abs(player_position[0] - self.position_x) <= enemy_agro_range * tile_size and
@@ -43,12 +48,13 @@ class Enemy(pygame.sprite.Sprite):
             self.check_obstacle_collisions('vertical')
             self.rect.center = (self.position_x, self.position_y)
 
-    # adjust the enemies health
+    # adjust the enemies health____________________________________________________________________
     def adjust_current_health(self, amount):
         self.current_health += amount
         if self.current_health <= 0:
             self.kill()
 
+    # check for collision between enemy and obstacle_______________________________________________
     def check_obstacle_collisions(self, direction):
         if collision:
 
@@ -66,6 +72,7 @@ class Enemy(pygame.sprite.Sprite):
                         self.rect.bottom = sprite.rect.top
                 self.position_x, self.position_y = self.rect.center
 
+    # check for collision between enemy and a projectile___________________________________________
     def check_projectile_collision(self):
         if collision:
 
