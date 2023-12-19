@@ -24,6 +24,8 @@ class Player(pygame.sprite.Sprite):
         self.max_health_bar = None
         self.current_health = max_health
         self.current_health_bar = None
+        self.invincibility_cooldown = fps // 2
+        self.invincible = False
 
         # Projectile Stuff
         self.shooting = False
@@ -171,16 +173,24 @@ class Player(pygame.sprite.Sprite):
     def check_enemy_collision(self):
         if collision:
 
-            # check enemy collision
-            for sprite in self.enemy_group.sprites():
-                if self.rect.colliderect(sprite):
-                    self.adjust_current_health(-10)
-                    self.player_direction = sprite.enemy_direction
-                    if sprite.enemy_direction.x != 0:
-                        self.rect.x += self.player_direction.x * 10
-                        self.check_obstacle_collisions('horizontal')
-                    if self.player_direction.y != 0:
-                        self.rect.y += self.player_direction.y * 10
-                        self.check_obstacle_collisions('vertical')
+            if self.invincible:
+                self.invincibility_cooldown += 1
+                if self.invincibility_cooldown >= fps // 2:
+                    self.invincible = False
+
+            else:
+                # check enemy collision
+                for sprite in self.enemy_group.sprites():
+                    if self.rect.colliderect(sprite):
+                        self.adjust_current_health(-10)
+                        self.player_direction = sprite.enemy_direction
+                        if sprite.enemy_direction.x != 0:
+                            self.rect.x += self.player_direction.x * 15
+                            self.check_obstacle_collisions('horizontal')
+                        if self.player_direction.y != 0:
+                            self.rect.y += self.player_direction.y * 15
+                            self.check_obstacle_collisions('vertical')
+                        self.invincible = True
+                        self.invincibility_cooldown = 0
 
 
