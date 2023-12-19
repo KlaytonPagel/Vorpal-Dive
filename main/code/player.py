@@ -33,6 +33,9 @@ class Player(pygame.sprite.Sprite):
         self.shoot_cooldown = fps
         self.damage = player_damage
 
+        # player stats
+        self.player_speed = player_speed
+
         # Define sprite groups
         self.obstacle_group = obstacle_group
         self.visible_group = visible_group
@@ -67,7 +70,7 @@ class Player(pygame.sprite.Sprite):
             self.adjust_current_health(10)
 
         if keys[pygame.K_MINUS]:
-            self.adjust_damage(1)
+            self.adjust_movement_speed(1)
 
         # mouse inputs
         for event in event_list:
@@ -87,10 +90,10 @@ class Player(pygame.sprite.Sprite):
             self.player_direction = self.player_direction.normalize()
 
         if self.player_direction.x != 0:
-            self.rect.x += self.player_direction.x * player_speed
+            self.rect.x += self.player_direction.x * self.player_speed
             self.check_obstacle_collisions('horizontal')
         if self.player_direction.y != 0:
-            self.rect.y += self.player_direction.y * player_speed
+            self.rect.y += self.player_direction.y * self.player_speed
             self.check_obstacle_collisions('vertical')
 
         self.check_enemy_collision()
@@ -156,15 +159,26 @@ class Player(pygame.sprite.Sprite):
 
     # create HUD objects for the players stats_____________________________________________________
     def create_stats_hud(self):
+        hud_size = (64, 64)
 
         # create the damage stat icon
         damage_stat_image = pygame.image.load('../textures/32X32/HUD/damage_stat.png').convert()
-        damage_stat_image = pygame.transform.scale(damage_stat_image, (64, 64))
-        damage_stat_icon = HUD((screen_width - 84, 20), damage_stat_image, self.hud_group)
+        damage_stat_image = pygame.transform.scale(damage_stat_image, hud_size)
+        damage_stat_icon = HUD((screen_width - (hud_size[0] + 20), 20), damage_stat_image, self.hud_group)
 
         # create the damage stat text
         Text((damage_stat_icon.rect.centerx, damage_stat_icon.rect.centery + 15),
              self.damage, self.hud_group, 30, (255, 255, 255), 'damage_stat')
+
+        # create the movement speed stat icon
+        movement_speed_stat_image = pygame.image.load('../textures/32X32/HUD/movement_speed_stat.png').convert()
+        movement_speed_stat_image = pygame.transform.scale(movement_speed_stat_image, hud_size)
+        movement_speed_stat_icon = HUD((screen_width - (hud_size[0] + 20) * 2, 20),
+                                       movement_speed_stat_image, self.hud_group)
+
+        # create the movement speed stat text
+        Text((movement_speed_stat_icon.rect.centerx, movement_speed_stat_icon.rect.centery + 15),
+             self.player_speed, self.hud_group, 30, (255, 255, 255), 'movement_speed')
 
     # adjust the players damage stat_______________________________________________________________
     def adjust_damage(self, amount):
@@ -172,6 +186,12 @@ class Player(pygame.sprite.Sprite):
         for sprite in self.hud_group.sprites():
             if sprite.name == 'damage_stat':
                 sprite.image = pygame.font.Font(None, 30).render(str(self.damage), True, (255, 255, 255))
+
+    def adjust_movement_speed(self, amount):
+        self.player_speed += amount
+        for sprite in self.hud_group.sprites():
+            if sprite.name == 'movement_speed':
+                sprite.image = pygame.font.Font(None, 30).render(str(self.player_speed), True, (255, 255, 255))
 
     # Check for any collisions between the player and obstacles____________________________________
     def check_obstacle_collisions(self, direction):
