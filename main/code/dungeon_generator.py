@@ -1,6 +1,6 @@
 import random
 import pygame
-from tiles import Visible
+from sprites import Tile
 from config import *
 
 
@@ -112,20 +112,20 @@ class Dungeon:
 
             # Check tile to the right
             if (tile[0] + tile_size, tile[1]) not in self.floor_tile_positions:
-                Visible((tile[0] + tile_size, tile[1]),
+                Tile((tile[0] + tile_size, tile[1]),
                         '../textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
 
             # check tile to the left
             if (tile[0] - tile_size, tile[1]) not in self.floor_tile_positions:
-                Visible((tile[0] - tile_size, tile[1]),
+                Tile((tile[0] - tile_size, tile[1]),
                         '../textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
 
             # check tile above
             if (tile[0], tile[1] + tile_size) not in self.floor_tile_positions:
-                Visible((tile[0], tile[1] + tile_size),
+                Tile((tile[0], tile[1] + tile_size),
                         '../textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
 
             # check tile below
             if (tile[0], tile[1] - tile_size) not in self.floor_tile_positions:
-                Visible((tile[0], tile[1] - tile_size),
+                Tile((tile[0], tile[1] - tile_size),
                         '../textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
