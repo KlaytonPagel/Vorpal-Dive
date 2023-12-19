@@ -2,8 +2,8 @@ import pygame
 from config import *
 from dungeon_generator import Dungeon
 from player import Player
-from Debug import debug
 from enemy_spawner import EnemySpawner
+from sprites import Text
 
 # start pygame_____________________________________________________________________________________
 pygame.init()
@@ -54,6 +54,7 @@ player = Player(visible_group, dungeon.player_start_position, screen, visible_gr
                 obstacle_group, projectile_group, enemy_group, hud_group)
 enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, visible_group, enemy_group, obstacle_group, projectile_group)
 
+debug = Text((screen_width - 72, screen_height - 72), str(round(clock.get_fps())), hud_group, 50, (255, 255, 255))
 
 while running:
     event_list = pygame.event.get()
@@ -64,10 +65,10 @@ while running:
     screen.fill((0, 0, 0))
     visible_group.custom_draw()
     player.update(event_list)
-    debug(str(round(clock.get_fps())))
 
     enemy_spawner.decide_spawn_enemy(player.rect.center)
     enemy_group.update(player.rect.center)
+    debug.image = pygame.font.Font(None, 50).render((str(round(clock.get_fps()))), True, (255, 255, 255))
 
     hud_group.draw(screen)
 

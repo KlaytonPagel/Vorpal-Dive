@@ -19,3 +19,12 @@ class HUD(pygame.sprite.Sprite):
         self.image = surf
         self.rect = self.image.get_rect(topleft=pos)
         self.name = name
+
+
+class Text(pygame.sprite.Sprite):
+    def __init__(self, pos, words, group, size, color, name='default'):
+        super().__init__(group)
+        self.image = pygame.font.Font(None, size)
+        self.image = self.image.render(str(words), True, color)
+        self.rect = self.image.get_rect(center=pos)
+        self.name = name

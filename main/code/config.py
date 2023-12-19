@@ -14,6 +14,7 @@ tunnel_width = 3
 # Player settings__________________________________________________________________________________
 player_speed = 5
 max_health = 100
+player_damage = 10
 
 # Shooting Settings________________________________________________________________________________
 projectile_speed = 2

@@ -1,7 +1,7 @@
 import pygame
 from config import *
 from projectiles import Projectile
-from sprites import HUD
+from sprites import HUD, Text
 
 
 # A class to create and manage the player character________________________________________________
@@ -31,6 +31,7 @@ class Player(pygame.sprite.Sprite):
         self.shooting = False
         self.can_shoot = True
         self.shoot_cooldown = fps
+        self.damage = player_damage
 
         # Define sprite groups
         self.obstacle_group = obstacle_group
@@ -40,6 +41,7 @@ class Player(pygame.sprite.Sprite):
         self.hud_group = hud_group
 
         self.health_bars()
+        self.create_stats_hud()
 
     # track all user input for the player__________________________________________________________
     def player_input(self, event_list):
@@ -65,7 +67,7 @@ class Player(pygame.sprite.Sprite):
             self.adjust_current_health(10)
 
         if keys[pygame.K_MINUS]:
-            self.adjust_current_health(-10)
+            self.adjust_damage(1)
 
         # mouse inputs
         for event in event_list:
@@ -151,6 +153,25 @@ class Player(pygame.sprite.Sprite):
         current_health_bar_surface = pygame.Surface((self.current_health, 10))
         current_health_bar_surface.fill((255, 0, 0))
         self.current_health_bar.image = current_health_bar_surface
+
+    # create HUD objects for the players stats_____________________________________________________
+    def create_stats_hud(self):
+
+        # create the damage stat icon
+        damage_stat_image = pygame.image.load('../textures/32X32/HUD/damage_stat.png').convert()
+        damage_stat_image = pygame.transform.scale(damage_stat_image, (64, 64))
+        damage_stat_icon = HUD((screen_width - 84, 20), damage_stat_image, self.hud_group)
+
+        # create the damage stat text
+        Text((damage_stat_icon.rect.centerx, damage_stat_icon.rect.centery + 15),
+             self.damage, self.hud_group, 30, (255, 255, 255), 'damage_stat')
+
+    # adjust the players damage stat_______________________________________________________________
+    def adjust_damage(self, amount):
+        self.damage += amount
+        for sprite in self.hud_group.sprites():
+            if sprite.name == 'damage_stat':
+                sprite.image = pygame.font.Font(None, 30).render(str(self.damage), True, (255, 255, 255))
 
     # Check for any collisions between the player and obstacles____________________________________
     def check_obstacle_collisions(self, direction):
