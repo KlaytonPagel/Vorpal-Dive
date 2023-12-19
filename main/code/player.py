@@ -84,11 +84,12 @@ class Player(pygame.sprite.Sprite):
 
         if self.player_direction.x != 0:
             self.rect.x += self.player_direction.x * player_speed
-            self.check_collisions('horizontal')
+            self.check_obstacle_collisions('horizontal')
         if self.player_direction.y != 0:
             self.rect.y += self.player_direction.y * player_speed
-            self.check_collisions('vertical')
+            self.check_obstacle_collisions('vertical')
 
+        self.check_enemy_collision()
         self.cool_downs()
         self.shoot()
 
@@ -149,8 +150,8 @@ class Player(pygame.sprite.Sprite):
         current_health_bar_surface.fill((255, 0, 0))
         self.current_health_bar.image = current_health_bar_surface
 
-    # Check for any collisions with the player_____________________________________________________
-    def check_collisions(self, direction):
+    # Check for any collisions between the player and obstacles____________________________________
+    def check_obstacle_collisions(self, direction):
         if collision:
 
             # Check obstacle collision
@@ -165,3 +166,21 @@ class Player(pygame.sprite.Sprite):
                         self.rect.top = sprite.rect.bottom
                     elif self.rect.colliderect(sprite) and self.player_direction.y > 0:
                         self.rect.bottom = sprite.rect.top
+
+    # check for any collisions between the player and enemies______________________________________
+    def check_enemy_collision(self):
+        if collision:
+
+            # check enemy collision
+            for sprite in self.enemy_group.sprites():
+                if self.rect.colliderect(sprite):
+                    self.adjust_current_health(-10)
+                    self.player_direction = sprite.enemy_direction
+                    if sprite.enemy_direction.x != 0:
+                        self.rect.x += self.player_direction.x * 10
+                        self.check_obstacle_collisions('horizontal')
+                    if self.player_direction.y != 0:
+                        self.rect.y += self.player_direction.y * 10
+                        self.check_obstacle_collisions('vertical')
+
+
