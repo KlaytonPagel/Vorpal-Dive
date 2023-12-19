@@ -13,6 +13,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
         self.rect = self.image.get_rect(topleft=position)
         self.rect = self.rect.inflate(0, -10)
+        self.position = position
         self.player_direction = pygame.math.Vector2()
 
         # Projectile Stuff
@@ -61,9 +62,11 @@ class Player(pygame.sprite.Sprite):
         self.player_input(event_list)
         if self.player_direction.magnitude() != 0:
             self.player_direction = self.player_direction.normalize()
-        self.rect.center += self.player_direction * player_speed
-
-        self.check_collisions()
+        self.rect.x += self.player_direction.x * player_speed
+        self.check_collisions('horizontal')
+        self.rect.y += self.player_direction.y * player_speed
+        self.check_collisions('vertical')
+        
         self.cool_downs()
         self.shoot()
 
@@ -93,17 +96,18 @@ class Player(pygame.sprite.Sprite):
             self.shoot_cooldown = 0
 
     # Check for any collisions with the player_____________________________________________________
-    def check_collisions(self):
-        tolerance = 5
+    def check_collisions(self, direction):
         if collision:
 
             # Check obstacle collision
             for sprite in self.obstacle_group.sprites():
-                if self.rect.colliderect(sprite) and abs(self.rect.right - sprite.rect.left) <= tolerance:
-                    self.rect.right = sprite.rect.left
-                elif self.rect.colliderect(sprite) and abs(self.rect.left - sprite.rect.right) <= tolerance:
-                    self.rect.left = sprite.rect.right
-                elif self.rect.colliderect(sprite) and abs(self.rect.top - sprite.rect.bottom) <= tolerance:
-                    self.rect.top = sprite.rect.bottom
-                elif self.rect.colliderect(sprite) and abs(self.rect.bottom - sprite.rect.top) <= tolerance:
-                    self.rect.bottom = sprite.rect.top
+                if direction == 'horizontal':
+                    if self.rect.colliderect(sprite) and self.player_direction.x > 0:
+                        self.rect.right = sprite.rect.left
+                    elif self.rect.colliderect(sprite) and self.player_direction.x < 0:
+                        self.rect.left = sprite.rect.right
+                if direction == 'vertical':
+                    if self.rect.colliderect(sprite) and self.player_direction.y < 0:
+                        self.rect.top = sprite.rect.bottom
+                    elif self.rect.colliderect(sprite) and self.player_direction.y > 0:
+                        self.rect.bottom = sprite.rect.top

@@ -20,7 +20,6 @@ class Enemy(pygame.sprite.Sprite):
 
     def update(self, player_position):
         self.enemy_pathfinding(player_position)
-        self.check_collisions()
 
     def enemy_pathfinding(self, player_position):
         # normalize the direction vector so the length of the line doesn't affect enemy speed
@@ -33,22 +32,25 @@ class Enemy(pygame.sprite.Sprite):
                 pass
 
             # update the floating point variables
-            self.position_x += self.enemy_direction.x * enemy_speed
-            self.position_y += self.enemy_direction.y * enemy_speed
+            self.rect.x += self.enemy_direction.x * enemy_speed
+            self.check_collisions('horizontal')
+            self.rect.y += self.enemy_direction.y * enemy_speed
+            self.check_collisions('vertical')
             self.rect.center = (self.position_x, self.position_y)
 
-    def check_collisions(self):
-        tolerance = 10
+    def check_collisions(self, direction):
         if collision:
 
             # Check obstacle collision
             for sprite in self.obstacle_group.sprites():
-                if self.rect.colliderect(sprite) and abs(self.rect.right - sprite.rect.left) <= tolerance:
-                    self.rect.right = sprite.rect.left
-                elif self.rect.colliderect(sprite) and abs(self.rect.left - sprite.rect.right) <= tolerance:
-                    self.rect.left = sprite.rect.right
-                elif self.rect.colliderect(sprite) and abs(self.rect.top - sprite.rect.bottom) <= tolerance:
-                    self.rect.top = sprite.rect.bottom
-                elif self.rect.colliderect(sprite) and abs(self.rect.bottom - sprite.rect.top) <= tolerance:
-                    self.rect.bottom = sprite.rect.top
+                if direction == 'horizontal':
+                    if self.rect.colliderect(sprite) and self.enemy_direction.x > 0:
+                        self.rect.right = sprite.rect.left
+                    elif self.rect.colliderect(sprite) and self.enemy_direction.x < 0:
+                        self.rect.left = sprite.rect.right
+                if direction == 'vertical':
+                    if self.rect.colliderect(sprite) and self.enemy_direction.y < 0:
+                        self.rect.top = sprite.rect.bottom
+                    elif self.rect.colliderect(sprite) and self.enemy_direction.y > 0:
+                        self.rect.bottom = sprite.rect.top
                 self.position_x, self.position_y = self.rect.center
