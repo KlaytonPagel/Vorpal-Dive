@@ -1,4 +1,5 @@
 import pygame
+from pygame.locals import *
 from config import *
 from dungeon_generator import Dungeon
 from player import Player
@@ -7,7 +8,7 @@ from sprites import Text
 
 # start pygame_____________________________________________________________________________________
 pygame.init()
-screen = pygame.display.set_mode((screen_width, screen_height))
+screen = pygame.display.set_mode((screen_width, screen_height), RESIZABLE)
 pygame.display.set_caption('py dungeon')
 running = True
 clock = pygame.time.Clock()
@@ -22,8 +23,8 @@ class VisibleGroup(pygame.sprite.Group):
 
     # Center the camera on the player
     def center_camera(self, target):
-        self.offset.x = target.rect.centerx - screen_width // 2
-        self.offset.y = target.rect.centery - screen_height // 2
+        self.offset.x = target.rect.centerx - pygame.display.get_surface().get_width() // 2
+        self.offset.y = target.rect.centery - pygame.display.get_surface().get_height() // 2
 
     # Draw all sprites on the screen
     def custom_draw(self):

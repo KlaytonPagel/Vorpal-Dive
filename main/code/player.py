@@ -1,3 +1,5 @@
+import math
+
 import pygame, json, os
 from config import *
 from projectiles import Projectile
@@ -32,10 +34,10 @@ class Player(pygame.sprite.Sprite):
         self.invincibility_cooldown = fps // 2
         self.invincible = False
 
-        # Default projectile values
-        self.shooting = False
-        self.can_shoot = True
-        self.shoot_cooldown = pygame.time.get_ticks()
+        # Default attacking values
+        self.attacking = False
+        self.can_attack = True
+        self.attack_cooldown = pygame.time.get_ticks()
         self.player_damage = 10
 
         # create the players weapon
@@ -46,6 +48,7 @@ class Player(pygame.sprite.Sprite):
 
         self.load_player_data()
         self.health_bars()
+        self.hud_elements = {}
         self.create_stats_hud()
 
     # Load all player stats and variables from JSON file___________________________________________
@@ -96,10 +99,10 @@ class Player(pygame.sprite.Sprite):
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
-                    self.shooting = True
+                    self.attacking = True
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    self.shooting = False
+                    self.attacking = False
 
     # Update all player function___________________________________________________________________
     def update(self, event_list):
@@ -126,6 +129,7 @@ class Player(pygame.sprite.Sprite):
 
         # update the current weapons position to match the player
         self.update_weapon()
+        self.update_stats_hud()
 
     # create the players weapon____________________________________________________________________
     def create_weapon(self):
@@ -136,26 +140,27 @@ class Player(pygame.sprite.Sprite):
     def update_weapon(self):
         self.current_weapon.rect.midleft = (self.rect.midright[0] - 5, self.rect.midright[1])
 
-    # all player cool downs________________________________________________________________________
-    def cool_downs(self):
-        current_time = pygame.time.get_ticks()
-
-        # Shooting cooldown
-        if not self.can_shoot:
-            if current_time - self.shoot_cooldown > 1000 // projectile_fire_rate:
-                self.can_shoot = True
-
     # if you are shooting then shoot_______________________________________________________________
     def shoot(self):
-        if self.shooting and self.can_shoot:
-            starting_point = pygame.math.Vector2(screen_width // 2, screen_height // 2)
+        screen = pygame.display.get_surface()
+        if self.attacking and self.can_attack:
+            starting_point = pygame.math.Vector2(screen.get_width() // 2, screen.get_height() // 2)
             end_point = pygame.math.Vector2(pygame.mouse.get_pos())
 
             Projectile((self.visible_group, self.weapon_group), self.rect.center,
                        starting_point, end_point, self.obstacle_group, self.player_damage)
 
-            self.can_shoot = False
-            self.shoot_cooldown = pygame.time.get_ticks()
+            self.can_attack = False
+            self.attack_cooldown = pygame.time.get_ticks()
+
+    # all player cool downs________________________________________________________________________
+    def cool_downs(self):
+        current_time = pygame.time.get_ticks()
+
+        # Shooting cooldown
+        if not self.can_attack:
+            if current_time - self.attack_cooldown > 1000 // projectile_fire_rate:
+                self.can_attack = True
 
     # Set up the players initial health bars_______________________________________________________
     def health_bars(self):
@@ -192,25 +197,43 @@ class Player(pygame.sprite.Sprite):
     # create HUD objects for the players stats_____________________________________________________
     def create_stats_hud(self):
         hud_size = (64, 64)
+        screen = pygame.display.get_surface()
 
         # create the damage stat icon
         damage_stat_image = pygame.image.load('../textures/32X32/HUD/damage_stat.png').convert()
         damage_stat_image = pygame.transform.scale(damage_stat_image, hud_size)
-        damage_stat_icon = HUD((screen_width - (hud_size[0] + 20), 20), damage_stat_image, self.hud_group)
+        damage_stat_icon = HUD((screen.get_width() - (hud_size[0] + 20), 20),
+                               damage_stat_image, self.hud_group, 'damage_icon')
+        self.hud_elements['damage_icon'] = damage_stat_icon
 
         # create the damage stat text
-        Text((damage_stat_icon.rect.centerx, damage_stat_icon.rect.centery + 15),
-             self.player_damage, self.hud_group, 30, (255, 255, 255), 'damage_stat')
+        damage_stat = Text((damage_stat_icon.rect.centerx, damage_stat_icon.rect.centery + 15),
+                           self.player_damage, self.hud_group, 30, (255, 255, 255), 'damage_stat')
+        self.hud_elements['damage_stat'] = damage_stat
 
         # create the movement speed stat icon
         movement_speed_stat_image = pygame.image.load('../textures/32X32/HUD/movement_speed_stat.png').convert()
         movement_speed_stat_image = pygame.transform.scale(movement_speed_stat_image, hud_size)
-        movement_speed_stat_icon = HUD((screen_width - (hud_size[0] + 20) * 2, 20),
-                                       movement_speed_stat_image, self.hud_group)
+        movement_speed_stat_icon = HUD((screen.get_width() - (hud_size[0] + 20) * 2, 20),
+                                       movement_speed_stat_image, self.hud_group, 'speed_icon')
+        self.hud_elements['speed_icon'] = movement_speed_stat_icon
 
         # create the movement speed stat text
-        Text((movement_speed_stat_icon.rect.centerx, movement_speed_stat_icon.rect.centery + 15),
-             self.player_speed, self.hud_group, 30, (255, 255, 255), 'movement_speed')
+        movement_speed_stat = Text((movement_speed_stat_icon.rect.centerx, movement_speed_stat_icon.rect.centery + 15),
+                                   self.player_speed, self.hud_group, 30, (255, 255, 255), 'movement_speed_stat')
+        self.hud_elements['movement_speed_stat'] = movement_speed_stat
+
+    # update the position of hud elements match the screen size____________________________________
+    def update_stats_hud(self):
+        hud_size = (64, 64)
+        screen = pygame.display.get_surface()
+        self.hud_elements['damage_icon'].rect.topleft = (screen.get_width() - (hud_size[0] + 20), 20)
+        self.hud_elements['damage_stat'].rect.center = (self.hud_elements['damage_icon'].rect.centerx,
+                                                        self.hud_elements['damage_icon'].rect.centery + 15)
+
+        self.hud_elements['speed_icon'].rect.topleft = (screen.get_width() - (hud_size[0] + 20) * 2, 20)
+        self.hud_elements['movement_speed_stat'].rect.center = (self.hud_elements['speed_icon'].rect.centerx,
+                                                                self.hud_elements['speed_icon'].rect.centery + 15)
 
     # adjust the players damage stat_______________________________________________________________
     def adjust_damage(self, amount):
@@ -219,6 +242,7 @@ class Player(pygame.sprite.Sprite):
             if sprite.name == 'damage_stat':
                 sprite.image = pygame.font.Font(None, 30).render(str(self.player_damage), True, (255, 255, 255))
 
+    # adjust the players movement speed by a defined amount________________________________________
     def adjust_movement_speed(self, amount):
         self.player_speed += amount
         for sprite in self.hud_group.sprites():
