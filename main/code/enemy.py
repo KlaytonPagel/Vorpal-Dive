@@ -4,7 +4,7 @@ from config import *
 
 # class to create enemy sprites____________________________________________________________________
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, group, position, obstacle_group, projectile_group):
+    def __init__(self, group, position, obstacle_group, weapon_group):
         super().__init__(group)
 
         # Enemy sprite setup
@@ -23,7 +23,7 @@ class Enemy(pygame.sprite.Sprite):
 
         # declaring sprite groups
         self.obstacle_group = obstacle_group
-        self.projectile_group = projectile_group
+        self.weapon_group = weapon_group
 
     # update the enemy every frame_________________________________________________________________
     def update(self, player_position):
@@ -77,14 +77,14 @@ class Enemy(pygame.sprite.Sprite):
         if collision:
 
             # check projectile collision
-            for sprite in self.projectile_group.sprites():
+            for sprite in self.weapon_group.sprites():
                 if self.rect.colliderect(sprite):
                     self.adjust_current_health(-sprite.damage)
-                    sprite.kill()
-                    self.enemy_direction = sprite.projectile_direction
+                    if sprite.weapon_type == 'projectile':
+                        sprite.kill()
                     if self.enemy_direction.x != 0:
-                        self.rect.x += self.enemy_direction.x * 20
+                        self.rect.x += self.enemy_direction.x * -tile_size
                         self.check_obstacle_collisions('horizontal')
                     if self.enemy_direction.y != 0:
-                        self.rect.y += self.enemy_direction.y * 20
+                        self.rect.y += self.enemy_direction.y * -tile_size
                         self.check_obstacle_collisions('vertical')

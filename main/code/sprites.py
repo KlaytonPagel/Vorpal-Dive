@@ -28,3 +28,14 @@ class Text(pygame.sprite.Sprite):
         self.image = self.image.render(str(words), True, color)
         self.rect = self.image.get_rect(center=pos)
         self.name = name
+
+
+class Weapon(pygame.sprite.Sprite):
+    def __init__(self, pos, image, group, sprite_size, damage,  weapon_type='default', name='default'):
+        super().__init__(group)
+        self.image = pygame.image.load(image).convert_alpha()
+        self.image = pygame.transform.scale(self.image, sprite_size)
+        self.rect = self.image.get_rect(center=pos)
+        self.damage = damage
+        self.name = name
+        self.weapon_type = weapon_type

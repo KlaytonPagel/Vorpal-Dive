@@ -12,6 +12,7 @@ class Projectile(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (tile_size // 4, tile_size // 4))
         self.rect = self.image.get_rect(center=position)
         self.projectile_direction = pygame.math.Vector2()
+        self.weapon_type = 'projectile'
 
         # points to find the direction to shoot in
         self.starting_point = pygame.math.Vector2(starting_point)

@@ -1,15 +1,20 @@
 import pygame, json, os
 from config import *
 from projectiles import Projectile
-from sprites import HUD, Text
+from sprites import HUD, Text, Weapon
 
 
 # A class to create and manage the player character________________________________________________
 class Player(pygame.sprite.Sprite):
-    def __init__(self, group, position, screen, visible_group, obstacle_group, projectile_group, enemy_group, hud_group):
+    def __init__(self, group, position, screen, visible_group, obstacle_group, weapon_group, enemy_group, hud_group):
         super().__init__(group)
 
-        self.screen = screen
+        # Define sprite groups
+        self.obstacle_group = obstacle_group
+        self.visible_group = visible_group
+        self.weapon_group = weapon_group
+        self.enemy_group = enemy_group
+        self.hud_group = hud_group
 
         # Player sprite setup
         self.image = pygame.image.load("../textures/Player.png").convert_alpha()
@@ -30,18 +35,14 @@ class Player(pygame.sprite.Sprite):
         # Default projectile values
         self.shooting = False
         self.can_shoot = True
-        self.shoot_cooldown = fps
+        self.shoot_cooldown = pygame.time.get_ticks()
         self.player_damage = 10
+
+        # create the players weapon
+        self.current_weapon = self.create_weapon()
 
         # default player stats
         self.player_speed = 5
-
-        # Define sprite groups
-        self.obstacle_group = obstacle_group
-        self.visible_group = visible_group
-        self.projectile_group = projectile_group
-        self.enemy_group = enemy_group
-        self.hud_group = hud_group
 
         self.load_player_data()
         self.health_bars()
@@ -57,7 +58,6 @@ class Player(pygame.sprite.Sprite):
             self.current_health = player_data['current_health']
             self.player_speed = player_data['player_speed']
             self.player_damage = player_data['player_damage']
-            print(player_data)
 
     # Save all player stats and variables from JSON file___________________________________________
     def save_player_data(self):
@@ -121,16 +121,28 @@ class Player(pygame.sprite.Sprite):
         self.shoot()
 
         # update all visible projectiles
-        for projectile in self.projectile_group:
+        for projectile in self.weapon_group:
             projectile.update()
+
+        # update the current weapons position to match the player
+        self.update_weapon()
+
+    # create the players weapon____________________________________________________________________
+    def create_weapon(self):
+        return Weapon(self.rect.midright, '../textures/32X32/wooden_sword.png', (self.visible_group, self.weapon_group),
+                      (tile_size, tile_size), 10, 'melee', 'wooden_sword')
+
+    # update the players weapon position___________________________________________________________
+    def update_weapon(self):
+        self.current_weapon.rect.midleft = (self.rect.midright[0] - 5, self.rect.midright[1])
 
     # all player cool downs________________________________________________________________________
     def cool_downs(self):
+        current_time = pygame.time.get_ticks()
 
         # Shooting cooldown
         if not self.can_shoot:
-            self.shoot_cooldown += projectile_fire_rate
-            if self.shoot_cooldown >= fps:
+            if current_time - self.shoot_cooldown > 1000 // projectile_fire_rate:
                 self.can_shoot = True
 
     # if you are shooting then shoot_______________________________________________________________
@@ -139,11 +151,11 @@ class Player(pygame.sprite.Sprite):
             starting_point = pygame.math.Vector2(screen_width // 2, screen_height // 2)
             end_point = pygame.math.Vector2(pygame.mouse.get_pos())
 
-            Projectile((self.visible_group, self.projectile_group), self.rect.center,
+            Projectile((self.visible_group, self.weapon_group), self.rect.center,
                        starting_point, end_point, self.obstacle_group, self.player_damage)
 
             self.can_shoot = False
-            self.shoot_cooldown = 0
+            self.shoot_cooldown = pygame.time.get_ticks()
 
     # Set up the players initial health bars_______________________________________________________
     def health_bars(self):
