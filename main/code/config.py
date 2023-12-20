@@ -11,11 +11,6 @@ min_room_height, max_room_height = 5, 15
 room_attempts = 25
 tunnel_width = 3
 
-# Player settings__________________________________________________________________________________
-player_speed = 5
-max_health = 100
-player_damage = 10
-
 # Shooting Settings________________________________________________________________________________
 projectile_speed = 2
 projectile_fire_rate = 1

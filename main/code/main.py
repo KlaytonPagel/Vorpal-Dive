@@ -60,6 +60,7 @@ while running:
     event_list = pygame.event.get()
     for event in event_list:
         if event.type == pygame.QUIT:
+            player.save_player_data()
             running = False
 
     screen.fill((0, 0, 0))

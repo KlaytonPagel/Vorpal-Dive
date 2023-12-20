@@ -4,7 +4,7 @@ from config import *
 
 # class for all game projectiles___________________________________________________________________
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, group, position, starting_point, end_point, obstacle_group):
+    def __init__(self, group, position, starting_point, end_point, obstacle_group, damage):
         super().__init__(group)
 
         # Projectile sprite setup
@@ -27,7 +27,7 @@ class Projectile(pygame.sprite.Sprite):
         self.projectile_distance = 0
 
         # projectiles damage
-        self.damage = 10
+        self.damage = damage
 
     # update the projectiles position______________________________________________________________
     def update(self):

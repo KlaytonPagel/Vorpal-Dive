@@ -1,4 +1,4 @@
-import pygame
+import pygame, json, os
 from config import *
 from projectiles import Projectile
 from sprites import HUD, Text
@@ -19,22 +19,22 @@ class Player(pygame.sprite.Sprite):
         self.position = position
         self.player_direction = pygame.math.Vector2()
 
-        # health stuff
-        self.max_health = max_health
+        # default health values
+        self.max_health = 100
         self.max_health_bar = None
-        self.current_health = max_health
+        self.current_health = 100
         self.current_health_bar = None
         self.invincibility_cooldown = fps // 2
         self.invincible = False
 
-        # Projectile Stuff
+        # Default projectile values
         self.shooting = False
         self.can_shoot = True
         self.shoot_cooldown = fps
-        self.damage = player_damage
+        self.player_damage = 10
 
-        # player stats
-        self.player_speed = player_speed
+        # default player stats
+        self.player_speed = 5
 
         # Define sprite groups
         self.obstacle_group = obstacle_group
@@ -43,8 +43,28 @@ class Player(pygame.sprite.Sprite):
         self.enemy_group = enemy_group
         self.hud_group = hud_group
 
+        self.load_player_data()
         self.health_bars()
         self.create_stats_hud()
+
+    # Load all player stats and variables from JSON file___________________________________________
+    def load_player_data(self):
+        if not os.path.isfile('../json/player_data.json'):
+            self.save_player_data()
+        with open('../json/player_data.json') as player_data_file:
+            player_data = json.load(player_data_file)
+            self.max_health = player_data['max_health']
+            self.current_health = player_data['current_health']
+            self.player_speed = player_data['player_speed']
+            self.player_damage = player_data['player_damage']
+            print(player_data)
+
+    # Save all player stats and variables from JSON file___________________________________________
+    def save_player_data(self):
+        player_data = {'max_health': self.max_health, 'current_health': self.current_health,
+                       'player_speed': self.player_speed, 'player_damage': self.player_damage}
+        with open('../json/player_data.json', 'w') as player_data_file:
+            json.dump(player_data, player_data_file)
 
     # track all user input for the player__________________________________________________________
     def player_input(self, event_list):
@@ -67,7 +87,7 @@ class Player(pygame.sprite.Sprite):
             self.player_direction.x = 0
 
         if keys[pygame.K_EQUALS]:
-            self.adjust_current_health(10)
+            self.adjust_current_health(-1)
 
         if keys[pygame.K_MINUS]:
             self.adjust_movement_speed(1)
@@ -120,7 +140,7 @@ class Player(pygame.sprite.Sprite):
             end_point = pygame.math.Vector2(pygame.mouse.get_pos())
 
             Projectile((self.visible_group, self.projectile_group), self.rect.center,
-                       starting_point, end_point, self.obstacle_group)
+                       starting_point, end_point, self.obstacle_group, self.player_damage)
 
             self.can_shoot = False
             self.shoot_cooldown = 0
@@ -168,7 +188,7 @@ class Player(pygame.sprite.Sprite):
 
         # create the damage stat text
         Text((damage_stat_icon.rect.centerx, damage_stat_icon.rect.centery + 15),
-             self.damage, self.hud_group, 30, (255, 255, 255), 'damage_stat')
+             self.player_damage, self.hud_group, 30, (255, 255, 255), 'damage_stat')
 
         # create the movement speed stat icon
         movement_speed_stat_image = pygame.image.load('../textures/32X32/HUD/movement_speed_stat.png').convert()
@@ -182,10 +202,10 @@ class Player(pygame.sprite.Sprite):
 
     # adjust the players damage stat_______________________________________________________________
     def adjust_damage(self, amount):
-        self.damage += amount
+        self.player_damage += amount
         for sprite in self.hud_group.sprites():
             if sprite.name == 'damage_stat':
-                sprite.image = pygame.font.Font(None, 30).render(str(self.damage), True, (255, 255, 255))
+                sprite.image = pygame.font.Font(None, 30).render(str(self.player_damage), True, (255, 255, 255))
 
     def adjust_movement_speed(self, amount):
         self.player_speed += amount

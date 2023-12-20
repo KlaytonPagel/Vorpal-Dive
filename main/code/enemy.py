@@ -79,7 +79,7 @@ class Enemy(pygame.sprite.Sprite):
             # check projectile collision
             for sprite in self.projectile_group.sprites():
                 if self.rect.colliderect(sprite):
-                    self.adjust_current_health(-player_damage)
+                    self.adjust_current_health(-sprite.damage)
                     sprite.kill()
                     self.enemy_direction = sprite.projectile_direction
                     if self.enemy_direction.x != 0:
