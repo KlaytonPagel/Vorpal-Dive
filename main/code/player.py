@@ -3,11 +3,12 @@ from config import *
 from projectiles import Projectile
 from sprites import Weapon
 from HUD import HUD
+from inventory import Inventory
 
 
 # A class to create and manage the player character________________________________________________
 class Player(pygame.sprite.Sprite):
-    def __init__(self, group, position, visible_group, obstacle_group, weapon_group, enemy_group, hud_group, menu_group):
+    def __init__(self, group, position, visible_group, obstacle_group, weapon_group, enemy_group, hud_group):
         super().__init__(group)
 
         # Define sprite groups
@@ -16,7 +17,6 @@ class Player(pygame.sprite.Sprite):
         self.weapon_group = weapon_group
         self.enemy_group = enemy_group
         self.hud_group = hud_group
-        self.menu_group = menu_group
 
         # Player sprite setup
         self.image = pygame.image.load("../textures/Player.png").convert_alpha()
@@ -46,11 +46,12 @@ class Player(pygame.sprite.Sprite):
 
         self.paused = False
         self.inventory_opened = False
+        self.inventory = Inventory()
 
         self.player_data = {}
         self.load_player_data()
         self.hud_elements = {}
-        self.HUD = HUD(self.hud_group, self.menu_group, self.hud_elements, self.player_data)
+        self.HUD = HUD(self.hud_group, self.hud_elements, self.player_data)
 
     # Load all player stats and variables from JSON file___________________________________________
     def load_player_data(self):
@@ -104,6 +105,7 @@ class Player(pygame.sprite.Sprite):
                     if self.hud_elements['inventory_icon'].rect.collidepoint(x, y):
                         if not self.inventory_opened:
                             self.inventory_opened = True
+                            self.inventory.load_inventory()
                         else:
                             self.inventory_opened = False
                     self.attacking = True
@@ -139,7 +141,7 @@ class Player(pygame.sprite.Sprite):
         self.HUD.update_hud()
 
         if self.inventory_opened:
-            self.update_inventory()
+            self.inventory.update_inventory()
 
     # create the players weapon____________________________________________________________________
     def create_weapon(self):
@@ -205,12 +207,6 @@ class Player(pygame.sprite.Sprite):
         for sprite in self.hud_group.sprites():
             if sprite.name == 'movement_speed_stat':
                 sprite.image = pygame.font.Font(None, 30).render(str(self.player_speed), True, (255, 255, 255))
-
-    # keep the players inventory open______________________________________________________________
-    def update_inventory(self):
-        screen = pygame.display.get_surface()
-        inventory = self.hud_elements['inventory']
-        screen.blit(inventory.image, inventory.rect.topleft)
 
     # Check for any collisions between the player and obstacles____________________________________
     def check_obstacle_collisions(self, direction):

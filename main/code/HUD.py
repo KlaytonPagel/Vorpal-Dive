@@ -3,10 +3,9 @@ from sprites import HUD_object, Text
 
 
 class HUD:
-    def __init__(self, hud_group, menu_group, hud_elements, player_data):
+    def __init__(self, hud_group, hud_elements, player_data):
         # Define groups
         self.hud_group = hud_group
-        self.menu_group = menu_group
         self.hud_elements = hud_elements
 
         # set player data
@@ -65,12 +64,6 @@ class HUD:
         inventory_icon_image = pygame.transform.scale(inventory_icon_image, hud_size)
         inventory_icon = HUD_object((20, 50), inventory_icon_image, self.hud_group, 'inventory_icon')
         self.hud_elements['inventory_icon'] = inventory_icon
-
-        # the inventory in its open state
-        inventory_image = pygame.image.load('../textures/32X32/HUD/inventory.png')
-        inventory = HUD_object(self.hud_elements['inventory_icon'].rect.topright, inventory_image,
-                               self.menu_group, 'inventory')
-        self.hud_elements['inventory'] = inventory
 
     # update the position of hud elements match the screen size____________________________________
     def update_hud(self):

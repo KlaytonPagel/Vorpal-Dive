@@ -48,12 +48,11 @@ obstacle_group = pygame.sprite.Group()
 weapon_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 hud_group = pygame.sprite.Group()
-menu_group = pygame.sprite.Group()
 
 # create objects___________________________________________________________________________________
 dungeon = Dungeon(visible_group, obstacle_group)
 player = Player(visible_group, dungeon.player_start_position, visible_group,
-                obstacle_group, weapon_group, enemy_group, hud_group, menu_group)
+                obstacle_group, weapon_group, enemy_group, hud_group)
 enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, visible_group, enemy_group, obstacle_group, weapon_group)
 
 debug = Text((screen_width - 72, screen_height - 72), str(round(clock.get_fps())), hud_group, 50, (255, 255, 255))
