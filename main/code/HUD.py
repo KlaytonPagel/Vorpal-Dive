@@ -18,7 +18,7 @@ class HUD:
         # create the initial HUD objects
         self.create_hud()
 
-# create HUD objects for the players stats_____________________________________________________
+    # create HUD objects for the players stats_____________________________________________________
     def create_hud(self):
         hud_size = (64, 64)
         screen = pygame.display.get_surface()

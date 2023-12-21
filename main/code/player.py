@@ -38,9 +38,6 @@ class Player(pygame.sprite.Sprite):
         self.attack_cooldown = pygame.time.get_ticks()
         self.player_damage = 10
 
-        # create the players weapon
-        self.current_weapon = self.create_weapon()
-
         # default player stats
         self.player_speed = 5
 
@@ -52,6 +49,9 @@ class Player(pygame.sprite.Sprite):
         self.load_player_data()
         self.hud_elements = {}
         self.HUD = HUD(self.hud_group, self.hud_elements, self.player_data)
+
+        # create the players weapon
+        self.current_weapon = self.create_weapon()
 
     # Load all player stats and variables from JSON file___________________________________________
     def load_player_data(self):
@@ -130,7 +130,12 @@ class Player(pygame.sprite.Sprite):
 
         self.check_enemy_collision()
         self.cool_downs()
-        self.shoot()
+
+        if self.current_weapon.weapon_type == 'range':
+            self.shoot()
+
+        if self.current_weapon.weapon_type == 'melee':
+            pass
 
         # update all visible projectiles
         for projectile in self.weapon_group:
@@ -145,8 +150,11 @@ class Player(pygame.sprite.Sprite):
 
     # create the players weapon____________________________________________________________________
     def create_weapon(self):
-        return Weapon(self.rect.midright, '../textures/32X32/wooden_sword.png', (self.visible_group, self.weapon_group),
-                      (tile_size, tile_size), 10, 'melee', 'wooden_sword')
+        weapon_id = self.inventory.inventory_slots['equipped']
+        weapon = self.inventory.item_IDs[weapon_id[2]]
+        self.adjust_damage(weapon[2])
+        return Weapon(self.rect.midright, weapon[0], (self.visible_group, self.weapon_group),
+                      (tile_size, tile_size), weapon[2], weapon[1])
 
     # update the players weapon position___________________________________________________________
     def update_weapon(self):
@@ -195,8 +203,10 @@ class Player(pygame.sprite.Sprite):
         self.hud_elements['current_health_bar'].image = current_health_bar_surface
 
     # adjust the players damage stat_______________________________________________________________
-    def adjust_damage(self, amount):
-        self.player_damage += amount
+    def adjust_damage(self, amount, adding=False):
+        if adding:
+            self.player_damage += amount
+        self.player_damage = amount
         for sprite in self.hud_group.sprites():
             if sprite.name == 'damage_stat':
                 sprite.image = pygame.font.Font(None, 30).render(str(self.player_damage), True, (255, 255, 255))
