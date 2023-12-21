@@ -1,0 +1,4 @@
+{
+  "1": ["../textures/32X32/HUD/wooden_sword_HUD.png", "melee", 10],
+  "2": ["../textures/32X32/HUD/wooden_gun_HUD.png", "range", 10]
+}
