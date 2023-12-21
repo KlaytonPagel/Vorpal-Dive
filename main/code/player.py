@@ -96,12 +96,6 @@ class Player(pygame.sprite.Sprite):
         else:
             self.player_direction.x = 0
 
-        if keys[pygame.K_EQUALS]:
-            self.inventory_opened = True
-
-        if keys[pygame.K_MINUS]:
-            self.inventory_opened = False
-
         # mouse inputs
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
@@ -144,9 +138,14 @@ class Player(pygame.sprite.Sprite):
                 if event.button == 1:
                     self.attacking = False
 
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_q:
-                    self.swap_weapon()
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
+                self.swap_weapon()
+
+            if event.type == pygame.KEYDOWN and event.key == pygame.K_TAB:
+                if self.inventory_opened:
+                    self.inventory_opened = False
+                else:
+                    self.inventory_opened = True
 
     # Update all player function___________________________________________________________________
     def update(self, event_list):
@@ -193,10 +192,10 @@ class Player(pygame.sprite.Sprite):
 
     # Swap the players main weapon with their secondary weapon____________________________________
     def swap_weapon(self):
-        equipped_weapon_id = self.inventory.inventory_slots['equipped'][2]
-        secondary_weapon_id = self.inventory.inventory_slots['secondary'][2]
-        self.inventory.inventory_slots['equipped'][2] = secondary_weapon_id
-        self.inventory.inventory_slots['secondary'][2] = equipped_weapon_id
+        equipped_weapon_id = self.inventory.inventory_slots['equipped'][1]
+        secondary_weapon_id = self.inventory.inventory_slots['secondary'][1]
+        self.inventory.inventory_slots['equipped'][1] = secondary_weapon_id
+        self.inventory.inventory_slots['secondary'][1] = equipped_weapon_id
         self.current_weapon.kill()
         del self.current_weapon
         self.current_weapon = self.create_weapon()
