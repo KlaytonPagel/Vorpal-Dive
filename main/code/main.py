@@ -62,6 +62,7 @@ while running:
     for event in event_list:
         if event.type == pygame.QUIT:
             player.save_player_data()
+            player.inventory.save_inventory()
             running = False
 
     screen.fill((0, 0, 0))

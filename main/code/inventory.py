@@ -6,33 +6,28 @@ from sprites import HUD_object
 
 class Inventory:
     def __init__(self, hud_group):
-        self.inventory_slots = {'1': ['occupied', (284, 54), '1'], '2': ['occupied', (353, 54), '2'],
-                                '3': ['occupied', (422, 54), '1'], '4': ['occupied', (491, 54), '1'],
-                                '5': ['occupied', (560, 54), '2'], '6': ['occupied', (284, 123), '1'],
-                                '7': ['occupied', (353, 123), '1'], '8': ['occupied', (422, 123), '1'],
-                                '9': ['occupied', (491, 123), '1'], '10': ['occupied', (560, 123), '2'],
-                                '11': ['occupied', (284, 192), '1'], '12': ['occupied', (353, 192), '1'],
-                                '13': ['occupied', (422, 192), '1'], '14': ['occupied', (491, 192), '1'],
-                                '15': ['occupied', (560, 192), '1'], '16': ['occupied', (284, 261), '1'],
-                                '17': ['occupied', (353, 261), '1'], '18': ['occupied', (422, 261), '1'],
-                                '19': ['occupied', (491, 261), '1'], '20': ['occupied', (560, 261), '1'],
-                                '21': ['occupied', (284, 330), '1'], '22': ['occupied', (353, 330), '1'],
-                                '23': ['occupied', (422, 330), '1'], '24': ['occupied', (491, 330), '1'],
-                                '25': ['occupied', (560, 330), '1'], 'equipped': ['occupied', (87, 330), '2'],
-                                'secondary': ['occupied', (156, 330), '1']
-                                }
+        self.inventory_slots = {}
+        self.load_inventory()
         self.inventory_items = []
         self.inventory_group = pygame.sprite.Group()
         self.inventory_menu = None
-        self.item_IDs = self.get_item_IDs()
+        self.item_IDs = self.get_item_ids()
 
         self.hud_group = hud_group
 
-    def get_item_IDs(self):
+    def save_inventory(self):
+        with open('../json/player_inventory.json', 'w') as player_inventory:
+            json.dump(self.inventory_slots, player_inventory)
+
+    def load_inventory(self):
+        with open('../json/player_inventory.json') as player_inventory:
+            self.inventory_slots = json.load(player_inventory)
+
+    def get_item_ids(self):
         with open('../json/item_IDs.json') as item_ID_file:
             return json.load(item_ID_file)
 
-    def load_inventory(self):
+    def update_inventory(self):
         self.inventory_items.clear()
 
         # the inventory in its open state
@@ -51,7 +46,7 @@ class Inventory:
                 self.inventory_items.append(item)
 
     # keep the players inventory open______________________________________________________________
-    def update_inventory(self):
+    def display_inventory(self):
         screen = pygame.display.get_surface()
         screen.blit(self.inventory_menu.image, self.inventory_menu.rect.topleft)
 
@@ -76,4 +71,4 @@ class Inventory:
             self.inventory_slots[item.slot][2] = self.inventory_slots['secondary'][2]
             self.inventory_slots['secondary'][2] = item.name
 
-        self.load_inventory()
+        self.update_inventory()

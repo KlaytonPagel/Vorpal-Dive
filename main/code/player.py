@@ -109,7 +109,7 @@ class Player(pygame.sprite.Sprite):
                 if self.hud_elements['inventory_icon'].rect.collidepoint(x, y):
                     if not self.inventory_opened:
                         self.inventory_opened = True
-                        self.inventory.load_inventory()
+                        self.inventory.update_inventory()
                     else:
                         self.inventory_opened = False
 
@@ -179,7 +179,7 @@ class Player(pygame.sprite.Sprite):
         self.HUD.update_hud()
 
         if self.inventory_opened:
-            self.inventory.update_inventory()
+            self.inventory.display_inventory()
 
     # create the players weapon____________________________________________________________________
     def create_weapon(self):
@@ -199,7 +199,7 @@ class Player(pygame.sprite.Sprite):
         del self.current_weapon
         self.current_weapon = self.create_weapon()
         if self.inventory_opened:
-            self.inventory.load_inventory()
+            self.inventory.update_inventory()
 
     # update the players weapon position___________________________________________________________
     def update_weapon(self):
