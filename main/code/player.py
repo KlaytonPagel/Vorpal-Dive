@@ -1,5 +1,3 @@
-import math
-
 import pygame, json, os
 from config import *
 from projectiles import Projectile
@@ -8,7 +6,7 @@ from sprites import HUD, Text, Weapon
 
 # A class to create and manage the player character________________________________________________
 class Player(pygame.sprite.Sprite):
-    def __init__(self, group, position, screen, visible_group, obstacle_group, weapon_group, enemy_group, hud_group):
+    def __init__(self, group, position, visible_group, obstacle_group, weapon_group, enemy_group, hud_group, menu_group):
         super().__init__(group)
 
         # Define sprite groups
@@ -17,6 +15,7 @@ class Player(pygame.sprite.Sprite):
         self.weapon_group = weapon_group
         self.enemy_group = enemy_group
         self.hud_group = hud_group
+        self.menu_group = menu_group
 
         # Player sprite setup
         self.image = pygame.image.load("../textures/Player.png").convert_alpha()
@@ -46,10 +45,12 @@ class Player(pygame.sprite.Sprite):
         # default player stats
         self.player_speed = 5
 
+        self.paused = False
+        self.inventory_opened = False
+
         self.load_player_data()
-        self.health_bars()
         self.hud_elements = {}
-        self.create_stats_hud()
+        self.create_hud()
 
     # Load all player stats and variables from JSON file___________________________________________
     def load_player_data(self):
@@ -90,15 +91,21 @@ class Player(pygame.sprite.Sprite):
             self.player_direction.x = 0
 
         if keys[pygame.K_EQUALS]:
-            self.adjust_current_health(-1)
+            self.inventory_opened = True
 
         if keys[pygame.K_MINUS]:
-            self.adjust_movement_speed(1)
+            self.inventory_opened = False
 
         # mouse inputs
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if event.button == 1:
+                    x, y = event.pos
+                    if self.hud_elements['inventory_icon'].rect.collidepoint(x, y):
+                        if not self.inventory_opened:
+                            self.inventory_opened = True
+                        else:
+                            self.inventory_opened = False
                     self.attacking = True
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
@@ -129,7 +136,10 @@ class Player(pygame.sprite.Sprite):
 
         # update the current weapons position to match the player
         self.update_weapon()
-        self.update_stats_hud()
+        self.update_hud()
+
+        if self.inventory_opened:
+            self.update_inventory()
 
     # create the players weapon____________________________________________________________________
     def create_weapon(self):
@@ -162,8 +172,11 @@ class Player(pygame.sprite.Sprite):
             if current_time - self.attack_cooldown > 1000 // projectile_fire_rate:
                 self.can_attack = True
 
-    # Set up the players initial health bars_______________________________________________________
-    def health_bars(self):
+    # create HUD objects for the players stats_____________________________________________________
+    def create_hud(self):
+        hud_size = (64, 64)
+        screen = pygame.display.get_surface()
+
         # health bar for maximum amount of health
         max_health_bar_surface = pygame.Surface((self.max_health, 10))
         max_health_bar_surface.fill((255, 255, 255))
@@ -173,31 +186,6 @@ class Player(pygame.sprite.Sprite):
         current_health_bar_surface = pygame.Surface((self.current_health, 10))
         current_health_bar_surface.fill((255, 0, 0))
         self.current_health_bar = HUD((20, 20), current_health_bar_surface, self.hud_group, 'current_health_bar')
-
-    # adjust the players maximum health____________________________________________________________
-    def adjust_max_health(self, amount):
-        self.max_health += amount
-        if self.max_health < 0:
-            self.max_health = 0
-        max_health_bar_surface = pygame.Surface((self.max_health, 10))
-        max_health_bar_surface.fill((255, 255, 255))
-        self.max_health_bar.image = max_health_bar_surface
-
-    # adjust players current health________________________________________________________________
-    def adjust_current_health(self, amount):
-        self.current_health += amount
-        if self.current_health < 0:
-            self.current_health = 0
-        if self.current_health > self.max_health:
-            self.current_health = self.max_health
-        current_health_bar_surface = pygame.Surface((self.current_health, 10))
-        current_health_bar_surface.fill((255, 0, 0))
-        self.current_health_bar.image = current_health_bar_surface
-
-    # create HUD objects for the players stats_____________________________________________________
-    def create_stats_hud(self):
-        hud_size = (64, 64)
-        screen = pygame.display.get_surface()
 
         # create the damage stat icon
         damage_stat_image = pygame.image.load('../textures/32X32/HUD/damage_stat.png').convert()
@@ -223,8 +211,19 @@ class Player(pygame.sprite.Sprite):
                                    self.player_speed, self.hud_group, 30, (255, 255, 255), 'movement_speed_stat')
         self.hud_elements['movement_speed_stat'] = movement_speed_stat
 
+        # hud icon to open the players inventory
+        inventory_icon_image = pygame.image.load('../textures/32X32/HUD/inventory_button.png').convert()
+        inventory_icon_image = pygame.transform.scale(inventory_icon_image, hud_size)
+        inventory_icon = HUD((20, 50), inventory_icon_image, self.hud_group, 'inventory_icon')
+        self.hud_elements['inventory_icon'] = inventory_icon
+
+        # the inventory in its open state
+        inventory_image = pygame.image.load('../textures/32X32/HUD/inventory.png')
+        inventory = HUD(self.hud_elements['inventory_icon'].rect.topright, inventory_image, self.menu_group, 'inventory')
+        self.hud_elements['inventory'] = inventory
+
     # update the position of hud elements match the screen size____________________________________
-    def update_stats_hud(self):
+    def update_hud(self):
         hud_size = (64, 64)
         screen = pygame.display.get_surface()
         self.hud_elements['damage_icon'].rect.topleft = (screen.get_width() - (hud_size[0] + 20), 20)
@@ -234,6 +233,26 @@ class Player(pygame.sprite.Sprite):
         self.hud_elements['speed_icon'].rect.topleft = (screen.get_width() - (hud_size[0] + 20) * 2, 20)
         self.hud_elements['movement_speed_stat'].rect.center = (self.hud_elements['speed_icon'].rect.centerx,
                                                                 self.hud_elements['speed_icon'].rect.centery + 15)
+
+    # adjust the players maximum health____________________________________________________________
+    def adjust_max_health(self, amount):
+        self.max_health += amount
+        if self.max_health < 0:
+            self.max_health = 0
+        max_health_bar_surface = pygame.Surface((self.max_health, 10))
+        max_health_bar_surface.fill((255, 255, 255))
+        self.max_health_bar.image = max_health_bar_surface
+
+    # adjust players current health________________________________________________________________
+    def adjust_current_health(self, amount):
+        self.current_health += amount
+        if self.current_health < 0:
+            self.current_health = 0
+        if self.current_health > self.max_health:
+            self.current_health = self.max_health
+        current_health_bar_surface = pygame.Surface((self.current_health, 10))
+        current_health_bar_surface.fill((255, 0, 0))
+        self.current_health_bar.image = current_health_bar_surface
 
     # adjust the players damage stat_______________________________________________________________
     def adjust_damage(self, amount):
@@ -246,8 +265,14 @@ class Player(pygame.sprite.Sprite):
     def adjust_movement_speed(self, amount):
         self.player_speed += amount
         for sprite in self.hud_group.sprites():
-            if sprite.name == 'movement_speed':
+            if sprite.name == 'movement_speed_stat':
                 sprite.image = pygame.font.Font(None, 30).render(str(self.player_speed), True, (255, 255, 255))
+
+    # keep the players inventory open______________________________________________________________
+    def update_inventory(self):
+        screen = pygame.display.get_surface()
+        inventory = self.hud_elements['inventory']
+        screen.blit(inventory.image, inventory.rect.topleft)
 
     # Check for any collisions between the player and obstacles____________________________________
     def check_obstacle_collisions(self, direction):
@@ -289,5 +314,3 @@ class Player(pygame.sprite.Sprite):
                             self.check_obstacle_collisions('vertical')
                         self.invincible = True
                         self.invincibility_cooldown = 0
-
-
