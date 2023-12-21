@@ -113,6 +113,10 @@ class Player(pygame.sprite.Sprite):
                 if event.button == 1:
                     self.attacking = False
 
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_q:
+                    self.swap_weapon()
+
     # Update all player function___________________________________________________________________
     def update(self, event_list):
 
@@ -155,6 +159,18 @@ class Player(pygame.sprite.Sprite):
         self.adjust_damage(weapon[2])
         return Weapon(self.rect.midright, weapon[0], (self.visible_group, self.weapon_group),
                       (tile_size, tile_size), weapon[2], weapon[1])
+
+    # Swap the players main weapon with their secondary weapon____________________________________
+    def swap_weapon(self):
+        equipped_weapon_id = self.inventory.inventory_slots['equipped'][2]
+        secondary_weapon_id = self.inventory.inventory_slots['secondary'][2]
+        self.inventory.inventory_slots['equipped'][2] = secondary_weapon_id
+        self.inventory.inventory_slots['secondary'][2] = equipped_weapon_id
+        self.current_weapon.kill()
+        del self.current_weapon
+        self.current_weapon = self.create_weapon()
+        if self.inventory_opened:
+            self.inventory.load_inventory()
 
     # update the players weapon position___________________________________________________________
     def update_weapon(self):

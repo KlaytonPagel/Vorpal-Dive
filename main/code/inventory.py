@@ -18,7 +18,8 @@ class Inventory:
                                 '19': ['occupied', (491, 261), '1'], '20': ['occupied', (560, 261), '1'],
                                 '21': ['occupied', (284, 330), '1'], '22': ['occupied', (353, 330), '1'],
                                 '23': ['occupied', (422, 330), '1'], '24': ['occupied', (491, 330), '1'],
-                                '25': ['occupied', (560, 330), '1'], 'equipped': ['occupied', (87, 330), '2']
+                                '25': ['occupied', (560, 330), '1'], 'equipped': ['occupied', (87, 330), '2'],
+                                'secondary': ['occupied', (156, 330), '1']
                                 }
         self.inventory_items = []
         self.inventory_group = pygame.sprite.Group()
