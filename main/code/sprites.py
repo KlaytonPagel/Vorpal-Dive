@@ -13,7 +13,7 @@ class Tile(pygame.sprite.Sprite):
         self.name = name
 
 
-class HUD(pygame.sprite.Sprite):
+class HUD_object(pygame.sprite.Sprite):
     def __init__(self, pos, surf, group, name='default'):
         super().__init__(group)
         self.image = surf

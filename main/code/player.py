@@ -1,7 +1,8 @@
 import pygame, json, os
 from config import *
 from projectiles import Projectile
-from sprites import HUD, Text, Weapon
+from sprites import Weapon
+from HUD import HUD
 
 
 # A class to create and manage the player character________________________________________________
@@ -27,9 +28,7 @@ class Player(pygame.sprite.Sprite):
 
         # default health values
         self.max_health = 100
-        self.max_health_bar = None
         self.current_health = 100
-        self.current_health_bar = None
         self.invincibility_cooldown = fps // 2
         self.invincible = False
 
@@ -48,20 +47,21 @@ class Player(pygame.sprite.Sprite):
         self.paused = False
         self.inventory_opened = False
 
+        self.player_data = {}
         self.load_player_data()
         self.hud_elements = {}
-        self.create_hud()
+        self.HUD = HUD(self.hud_group, self.menu_group, self.hud_elements, self.player_data)
 
     # Load all player stats and variables from JSON file___________________________________________
     def load_player_data(self):
         if not os.path.isfile('../json/player_data.json'):
             self.save_player_data()
         with open('../json/player_data.json') as player_data_file:
-            player_data = json.load(player_data_file)
-            self.max_health = player_data['max_health']
-            self.current_health = player_data['current_health']
-            self.player_speed = player_data['player_speed']
-            self.player_damage = player_data['player_damage']
+            self.player_data = json.load(player_data_file)
+            self.max_health = self.player_data['max_health']
+            self.current_health = self.player_data['current_health']
+            self.player_speed = self.player_data['player_speed']
+            self.player_damage = self.player_data['player_damage']
 
     # Save all player stats and variables from JSON file___________________________________________
     def save_player_data(self):
@@ -136,7 +136,7 @@ class Player(pygame.sprite.Sprite):
 
         # update the current weapons position to match the player
         self.update_weapon()
-        self.update_hud()
+        self.HUD.update_hud()
 
         if self.inventory_opened:
             self.update_inventory()
@@ -172,68 +172,6 @@ class Player(pygame.sprite.Sprite):
             if current_time - self.attack_cooldown > 1000 // projectile_fire_rate:
                 self.can_attack = True
 
-    # create HUD objects for the players stats_____________________________________________________
-    def create_hud(self):
-        hud_size = (64, 64)
-        screen = pygame.display.get_surface()
-
-        # health bar for maximum amount of health
-        max_health_bar_surface = pygame.Surface((self.max_health, 10))
-        max_health_bar_surface.fill((255, 255, 255))
-        self.max_health_bar = HUD((20, 20), max_health_bar_surface, self.hud_group, 'max_health_bar')
-
-        # health bar for players current health
-        current_health_bar_surface = pygame.Surface((self.current_health, 10))
-        current_health_bar_surface.fill((255, 0, 0))
-        self.current_health_bar = HUD((20, 20), current_health_bar_surface, self.hud_group, 'current_health_bar')
-
-        # create the damage stat icon
-        damage_stat_image = pygame.image.load('../textures/32X32/HUD/damage_stat.png').convert()
-        damage_stat_image = pygame.transform.scale(damage_stat_image, hud_size)
-        damage_stat_icon = HUD((screen.get_width() - (hud_size[0] + 20), 20),
-                               damage_stat_image, self.hud_group, 'damage_icon')
-        self.hud_elements['damage_icon'] = damage_stat_icon
-
-        # create the damage stat text
-        damage_stat = Text((damage_stat_icon.rect.centerx, damage_stat_icon.rect.centery + 15),
-                           self.player_damage, self.hud_group, 30, (255, 255, 255), 'damage_stat')
-        self.hud_elements['damage_stat'] = damage_stat
-
-        # create the movement speed stat icon
-        movement_speed_stat_image = pygame.image.load('../textures/32X32/HUD/movement_speed_stat.png').convert()
-        movement_speed_stat_image = pygame.transform.scale(movement_speed_stat_image, hud_size)
-        movement_speed_stat_icon = HUD((screen.get_width() - (hud_size[0] + 20) * 2, 20),
-                                       movement_speed_stat_image, self.hud_group, 'speed_icon')
-        self.hud_elements['speed_icon'] = movement_speed_stat_icon
-
-        # create the movement speed stat text
-        movement_speed_stat = Text((movement_speed_stat_icon.rect.centerx, movement_speed_stat_icon.rect.centery + 15),
-                                   self.player_speed, self.hud_group, 30, (255, 255, 255), 'movement_speed_stat')
-        self.hud_elements['movement_speed_stat'] = movement_speed_stat
-
-        # hud icon to open the players inventory
-        inventory_icon_image = pygame.image.load('../textures/32X32/HUD/inventory_button.png').convert()
-        inventory_icon_image = pygame.transform.scale(inventory_icon_image, hud_size)
-        inventory_icon = HUD((20, 50), inventory_icon_image, self.hud_group, 'inventory_icon')
-        self.hud_elements['inventory_icon'] = inventory_icon
-
-        # the inventory in its open state
-        inventory_image = pygame.image.load('../textures/32X32/HUD/inventory.png')
-        inventory = HUD(self.hud_elements['inventory_icon'].rect.topright, inventory_image, self.menu_group, 'inventory')
-        self.hud_elements['inventory'] = inventory
-
-    # update the position of hud elements match the screen size____________________________________
-    def update_hud(self):
-        hud_size = (64, 64)
-        screen = pygame.display.get_surface()
-        self.hud_elements['damage_icon'].rect.topleft = (screen.get_width() - (hud_size[0] + 20), 20)
-        self.hud_elements['damage_stat'].rect.center = (self.hud_elements['damage_icon'].rect.centerx,
-                                                        self.hud_elements['damage_icon'].rect.centery + 15)
-
-        self.hud_elements['speed_icon'].rect.topleft = (screen.get_width() - (hud_size[0] + 20) * 2, 20)
-        self.hud_elements['movement_speed_stat'].rect.center = (self.hud_elements['speed_icon'].rect.centerx,
-                                                                self.hud_elements['speed_icon'].rect.centery + 15)
-
     # adjust the players maximum health____________________________________________________________
     def adjust_max_health(self, amount):
         self.max_health += amount
@@ -241,7 +179,7 @@ class Player(pygame.sprite.Sprite):
             self.max_health = 0
         max_health_bar_surface = pygame.Surface((self.max_health, 10))
         max_health_bar_surface.fill((255, 255, 255))
-        self.max_health_bar.image = max_health_bar_surface
+        self.hud_elements['max_health_bar'].image = max_health_bar_surface
 
     # adjust players current health________________________________________________________________
     def adjust_current_health(self, amount):
@@ -252,7 +190,7 @@ class Player(pygame.sprite.Sprite):
             self.current_health = self.max_health
         current_health_bar_surface = pygame.Surface((self.current_health, 10))
         current_health_bar_surface.fill((255, 0, 0))
-        self.current_health_bar.image = current_health_bar_surface
+        self.hud_elements['current_health_bar'].image = current_health_bar_surface
 
     # adjust the players damage stat_______________________________________________________________
     def adjust_damage(self, amount):
