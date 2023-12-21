@@ -195,6 +195,7 @@ class Player(pygame.sprite.Sprite):
         secondary_weapon_id = self.inventory.inventory_slots['secondary'][2]
         self.inventory.inventory_slots['equipped'][2] = secondary_weapon_id
         self.inventory.inventory_slots['secondary'][2] = equipped_weapon_id
+        self.current_weapon.kill()
         del self.current_weapon
         self.current_weapon = self.create_weapon()
         if self.inventory_opened:

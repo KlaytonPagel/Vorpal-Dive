@@ -73,7 +73,7 @@ class Inventory:
             self.inventory_slots['equipped'][2] = item.name
 
         if option.name == 'secondary':
-            self.inventory_slots[item.slot][2] = self.inventory_slots['equipped'][2]
+            self.inventory_slots[item.slot][2] = self.inventory_slots['secondary'][2]
             self.inventory_slots['secondary'][2] = item.name
 
         self.load_inventory()
