@@ -43,7 +43,10 @@ class Player(pygame.sprite.Sprite):
 
         self.paused = False
         self.inventory_opened = False
-        self.inventory = Inventory()
+        self.option_opened = False
+        self.just_closed_option = False
+        self.selected_item = None
+        self.inventory = Inventory(self.hud_group)
 
         self.player_data = {}
         self.load_player_data()
@@ -99,16 +102,42 @@ class Player(pygame.sprite.Sprite):
 
         # mouse inputs
         for event in event_list:
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                if event.button == 1:
-                    x, y = event.pos
-                    if self.hud_elements['inventory_icon'].rect.collidepoint(x, y):
-                        if not self.inventory_opened:
-                            self.inventory_opened = True
-                            self.inventory.load_inventory()
-                        else:
-                            self.inventory_opened = False
-                    self.attacking = True
+            if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+                x, y = event.pos
+
+                # if player presses the inventory button
+                if self.hud_elements['inventory_icon'].rect.collidepoint(x, y):
+                    if not self.inventory_opened:
+                        self.inventory_opened = True
+                        self.inventory.load_inventory()
+                    else:
+                        self.inventory_opened = False
+
+                # if an option window is open
+                if self.option_opened:
+                    for option in self.hud_group:
+                        if option.name == 'equip' or option.name == 'secondary':
+                            if option.rect.collidepoint(x, y):
+                                self.inventory.swap_items(option, self.selected_item)
+                                self.current_weapon.kill()
+                                del self.current_weapon
+                                self.current_weapon = self.create_weapon()
+                            option.kill()
+                            del option
+                            self.option_opened = False
+                            self.just_closed_option = True
+
+                # if player selects an item icon in the inventory
+                if self.inventory_opened and not self.option_opened:
+                    if not self.just_closed_option:
+                        for item in self.inventory.inventory_items:
+                            if item.rect.collidepoint(x, y):
+                                self.inventory.swap_item_buttons((x, y))
+                                self.option_opened = True
+                                self.selected_item = item
+                    self.just_closed_option = False
+
+                self.attacking = True
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.attacking = False
@@ -166,7 +195,6 @@ class Player(pygame.sprite.Sprite):
         secondary_weapon_id = self.inventory.inventory_slots['secondary'][2]
         self.inventory.inventory_slots['equipped'][2] = secondary_weapon_id
         self.inventory.inventory_slots['secondary'][2] = equipped_weapon_id
-        self.current_weapon.kill()
         del self.current_weapon
         self.current_weapon = self.create_weapon()
         if self.inventory_opened:

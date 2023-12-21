@@ -5,7 +5,7 @@ from sprites import HUD_object
 
 
 class Inventory:
-    def __init__(self):
+    def __init__(self, hud_group):
         self.inventory_slots = {'1': ['occupied', (284, 54), '1'], '2': ['occupied', (353, 54), '2'],
                                 '3': ['occupied', (422, 54), '1'], '4': ['occupied', (491, 54), '1'],
                                 '5': ['occupied', (560, 54), '2'], '6': ['occupied', (284, 123), '1'],
@@ -26,11 +26,15 @@ class Inventory:
         self.inventory_menu = None
         self.item_IDs = self.get_item_IDs()
 
+        self.hud_group = hud_group
+
     def get_item_IDs(self):
         with open('../json/item_IDs.json') as item_ID_file:
             return json.load(item_ID_file)
 
     def load_inventory(self):
+        self.inventory_items.clear()
+
         # the inventory in its open state
         inventory_image = pygame.image.load('../textures/32X32/HUD/inventory.png')
         inventory = HUD_object((84, 50), inventory_image,
@@ -42,7 +46,8 @@ class Inventory:
             if self.inventory_slots[slot][0] == 'occupied':
                 item = pygame.image.load(self.item_IDs[self.inventory_slots[slot][2]][0]).convert()
                 item = pygame.transform.scale(item, (64, 64))
-                item = HUD_object(self.inventory_slots[slot][1], item, self.inventory_group)
+                item = HUD_object(self.inventory_slots[slot][1], item, self.inventory_group,
+                                  self.inventory_slots[slot][2], slot)
                 self.inventory_items.append(item)
 
     # keep the players inventory open______________________________________________________________
@@ -52,3 +57,23 @@ class Inventory:
 
         for item in self.inventory_items:
             screen.blit(item.image, item.rect.topleft)
+
+    # creates the buttons to swap selected item with the equipped or secondary item________________
+    def swap_item_buttons(self, position):
+        equip_button_image = pygame.image.load('../textures/32X32/HUD/equip_button.png')
+        equip_button = HUD_object(position,equip_button_image, self.hud_group, 'equip')
+        secondary_button_image = pygame.image.load('../textures/32X32/HUD/secondary_button.png')
+        HUD_object(equip_button.rect.bottomleft, secondary_button_image, self.hud_group, 'secondary')
+
+    # swaps the players selected item with the equipped or secondary item__________________________
+    def swap_items(self, option, item):
+
+        if option.name == 'equip':
+            self.inventory_slots[item.slot][2] = self.inventory_slots['equipped'][2]
+            self.inventory_slots['equipped'][2] = item.name
+
+        if option.name == 'secondary':
+            self.inventory_slots[item.slot][2] = self.inventory_slots['equipped'][2]
+            self.inventory_slots['secondary'][2] = item.name
+
+        self.load_inventory()

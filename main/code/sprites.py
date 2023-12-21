@@ -14,11 +14,12 @@ class Tile(pygame.sprite.Sprite):
 
 
 class HUD_object(pygame.sprite.Sprite):
-    def __init__(self, pos, surf, group, name='default'):
+    def __init__(self, pos, surf, group, name='default', slot='default'):
         super().__init__(group)
         self.image = surf
         self.rect = self.image.get_rect(topleft=pos)
         self.name = name
+        self.slot = slot
 
 
 class Text(pygame.sprite.Sprite):
