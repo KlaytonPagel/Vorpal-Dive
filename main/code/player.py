@@ -1,4 +1,6 @@
-import pygame, json, os
+import pygame
+import json
+import os
 from config import *
 from projectiles import Projectile
 from sprites import Weapon
@@ -183,8 +185,8 @@ class Player(pygame.sprite.Sprite):
 
     # create the players weapon____________________________________________________________________
     def create_weapon(self):
-        weapon_id = self.inventory.inventory_slots['equipped']
-        weapon = self.inventory.item_IDs[weapon_id[2]]
+        weapon_id = self.inventory.inventory_slots['equipped'][1]
+        weapon = self.inventory.item_IDs[weapon_id]
         self.adjust_damage(weapon[2])
         return Weapon(self.rect.midright, weapon[0], (self.visible_group, self.weapon_group),
                       (tile_size, tile_size), weapon[2], weapon[1])
