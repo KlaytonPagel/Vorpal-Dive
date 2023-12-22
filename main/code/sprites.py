@@ -13,7 +13,7 @@ class Tile(pygame.sprite.Sprite):
         self.name = name
 
 
-class HUD_object(pygame.sprite.Sprite):
+class HUDobject(pygame.sprite.Sprite):
     def __init__(self, pos, surf, group, name='default', slot='default'):
         super().__init__(group)
         self.image = surf
@@ -37,6 +37,16 @@ class Weapon(pygame.sprite.Sprite):
         self.image = pygame.image.load(image).convert_alpha()
         self.image = pygame.transform.scale(self.image, sprite_size)
         self.rect = self.image.get_rect(center=pos)
+        self.damage = damage
+        self.name = name
+        self.weapon_type = weapon_type
+
+
+class WeaponAnimation(pygame.sprite.Sprite):
+    def __init__(self, pos, image, group, damage,  weapon_type='default', name='default'):
+        super().__init__(group)
+        self.image = image
+        self.rect = self.image.get_rect(topleft=pos)
         self.damage = damage
         self.name = name
         self.weapon_type = weapon_type

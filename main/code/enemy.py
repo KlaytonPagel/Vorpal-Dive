@@ -81,10 +81,10 @@ class Enemy(pygame.sprite.Sprite):
                 if self.rect.colliderect(sprite):
                     if sprite.weapon_type == 'projectile':
                         sprite.kill()
-                        self.adjust_current_health(-sprite.damage)
-                        if self.enemy_direction.x != 0:
-                            self.rect.x += self.enemy_direction.x * -tile_size
-                            self.check_obstacle_collisions('horizontal')
-                        if self.enemy_direction.y != 0:
-                            self.rect.y += self.enemy_direction.y * -tile_size
-                            self.check_obstacle_collisions('vertical')
+                    self.adjust_current_health(-sprite.damage)
+                    if self.enemy_direction.x != 0:
+                        self.rect.x += self.enemy_direction.x * -tile_size
+                        self.check_obstacle_collisions('horizontal')
+                    if self.enemy_direction.y != 0:
+                        self.rect.y += self.enemy_direction.y * -tile_size
+                        self.check_obstacle_collisions('vertical')

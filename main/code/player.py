@@ -3,7 +3,7 @@ import json
 import os
 from config import *
 from projectiles import Projectile
-from sprites import Weapon
+from sprites import Weapon, WeaponAnimation
 from HUD import HUD
 from inventory import Inventory
 
@@ -35,10 +35,15 @@ class Player(pygame.sprite.Sprite):
         self.invincible = False
 
         # Default attacking values
-        self.attacking = False
+        self.shooting = False
+        self.swinging = False
+        self.start_swing = True
+        self.weapon_animation = None
+        self.swing_direction = 'right'
         self.can_attack = True
         self.attack_cooldown = pygame.time.get_ticks()
         self.player_damage = 10
+        self.swing_image_index = 0
 
         # default player stats
         self.player_speed = 5
@@ -133,10 +138,15 @@ class Player(pygame.sprite.Sprite):
                                 self.selected_item = item
                     self.just_closed_option = False
 
-                self.attacking = True
+                if self.current_weapon.weapon_type == 'range':
+                    self.shooting = True
+                if self.current_weapon.weapon_type == 'melee':
+                    self.set_direction((x, y))
+                    self.swinging = True
+
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
-                    self.attacking = False
+                    self.shooting = False
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 self.swap_weapon()
@@ -145,6 +155,7 @@ class Player(pygame.sprite.Sprite):
                 if self.inventory_opened:
                     self.inventory_opened = False
                 else:
+                    self.inventory.update_inventory()
                     self.inventory_opened = True
 
     # Update all player function___________________________________________________________________
@@ -165,15 +176,14 @@ class Player(pygame.sprite.Sprite):
         self.check_enemy_collision()
         self.cool_downs()
 
+        # update all projectile and weapon animations
+        self.update_weapon_effects()
+
         if self.current_weapon.weapon_type == 'range':
             self.shoot()
 
         if self.current_weapon.weapon_type == 'melee':
-            pass
-
-        # update all visible projectiles
-        for projectile in self.weapon_group:
-            projectile.update()
+            self.swing()
 
         # update the current weapons position to match the player
         self.update_weapon()
@@ -206,10 +216,34 @@ class Player(pygame.sprite.Sprite):
     def update_weapon(self):
         self.current_weapon.rect.midleft = (self.rect.midright[0] - 5, self.rect.midright[1])
 
-    # if you are shooting then shoot_______________________________________________________________
+    # set the players attacking direction__________________________________________________________
+    def set_direction(self, mouse_pos):
+        screen = pygame.display.get_surface()
+        mouse_pos = pygame.math.Vector2(mouse_pos)
+        center_pos = pygame.math.Vector2(screen.get_width() // 2, screen.get_height() // 2)
+        direction = (mouse_pos - center_pos).normalize()
+        direction.x, direction.y = int(round(direction.x)), int(round(direction.y))
+        if direction.x == 1 and direction.y == 0:
+            self.swing_direction = 'right'
+        if direction.x == 1 and direction.y == -1:
+            self.swing_direction = 'right'
+        if direction.x == 0 and direction.y == 1:
+            self.swing_direction = 'down'
+        if direction.x == 1 and direction.y == 1:
+            self.swing_direction = 'down'
+        if direction.x == -1 and direction.y == 0:
+            self.swing_direction = 'left'
+        if direction.x == -1 and direction.y == 1:
+            self.swing_direction = 'left'
+        if direction.x == 0 and direction.y == -1:
+            self.swing_direction = 'up'
+        if direction.x == -1 and direction.y == -1:
+            self.swing_direction = 'up'
+
+    # if you are attacking with a ranged weapon shoot______________________________________________
     def shoot(self):
         screen = pygame.display.get_surface()
-        if self.attacking and self.can_attack:
+        if self.shooting and self.can_attack:
             starting_point = pygame.math.Vector2(screen.get_width() // 2, screen.get_height() // 2)
             end_point = pygame.math.Vector2(pygame.mouse.get_pos())
 
@@ -218,6 +252,54 @@ class Player(pygame.sprite.Sprite):
 
             self.can_attack = False
             self.attack_cooldown = pygame.time.get_ticks()
+
+    # if you are attacking with a melee weapon then swing__________________________________________
+    def swing(self):
+        if self.swinging and self.can_attack:
+            swing_animation_frames = [pygame.image.load('../textures/32X32/HUD/slash_first.png').convert_alpha(),
+                                      pygame.image.load('../textures/32X32/HUD/slash_second.png').convert_alpha()]
+
+            if self.start_swing:
+                self.weapon_animation = WeaponAnimation((self.rect.topright[0] + 16, self.rect.topright[1] - 16),
+                                                        swing_animation_frames[0],
+                                                        (self.visible_group, self.weapon_group),
+                                                        self.player_damage, 'animation')
+                self.start_swing = False
+
+            if self.swing_direction == 'right':
+                self.weapon_animation.image = swing_animation_frames[int(self.swing_image_index)]
+                self.weapon_animation.rect.topleft = (self.rect.topright[0] + 16, self.rect.topright[1] - 16)
+            elif self.swing_direction == 'down':
+                self.weapon_animation.image = swing_animation_frames[int(self.swing_image_index)]
+                self.weapon_animation.image = pygame.transform.rotate(self.weapon_animation.image, 270)
+                self.weapon_animation.rect.topleft = (self.rect.bottomleft[0] - 16, self.rect.bottomleft[1] + 16)
+            elif self.swing_direction == 'left':
+                self.weapon_animation.image = swing_animation_frames[int(self.swing_image_index)]
+                self.weapon_animation.image = pygame.transform.rotate(self.weapon_animation.image, 180)
+                self.weapon_animation.rect.topleft = (self.rect.topleft[0] - 32, self.rect.topleft[1] - 16)
+            else:
+                self.weapon_animation.image = swing_animation_frames[int(self.swing_image_index)]
+                self.weapon_animation.image = pygame.transform.rotate(self.weapon_animation.image, 90)
+                self.weapon_animation.rect.topleft = (self.rect.topleft[0] - 16, self.rect.topleft[1] - 32)
+
+            self.swing_image_index += 0.35
+            if self.swing_image_index >= len(swing_animation_frames):
+                self.swing_image_index = 0
+                self.swinging = False
+                for effect in self.weapon_group:
+                    if effect.weapon_type == 'animation':
+                        effect.kill()
+                        del effect
+
+                self.can_attack = False
+                self.start_swing = True
+                self.attack_cooldown = pygame.time.get_ticks()
+
+    # update all weapon projectiles and animations_________________________________________________
+    def update_weapon_effects(self):
+        for effect in self.weapon_group:
+            if effect.weapon_type == 'projectile':
+                effect.update()
 
     # all player cool downs________________________________________________________________________
     def cool_downs(self):

@@ -1,5 +1,5 @@
 import pygame
-from sprites import HUD_object, Text
+from sprites import HUDobject, Text
 
 
 class HUD:
@@ -26,20 +26,20 @@ class HUD:
         # health bar for maximum amount of health
         max_health_bar_surface = pygame.Surface((self.max_health, 10))
         max_health_bar_surface.fill((255, 255, 255))
-        max_health_bar = HUD_object((20, 20), max_health_bar_surface, self.hud_group, 'max_health_bar')
+        max_health_bar = HUDobject((20, 20), max_health_bar_surface, self.hud_group, 'max_health_bar')
         self.hud_elements['max_health_bar'] = max_health_bar
 
         # health bar for players current health
         current_health_bar_surface = pygame.Surface((self.current_health, 10))
         current_health_bar_surface.fill((255, 0, 0))
-        current_health_bar = HUD_object((20, 20), current_health_bar_surface, self.hud_group, 'current_health_bar')
+        current_health_bar = HUDobject((20, 20), current_health_bar_surface, self.hud_group, 'current_health_bar')
         self.hud_elements['current_health_bar'] = current_health_bar
 
         # create the damage stat icon
         damage_stat_image = pygame.image.load('../textures/32X32/HUD/damage_stat.png').convert()
         damage_stat_image = pygame.transform.scale(damage_stat_image, hud_size)
-        damage_stat_icon = HUD_object((screen.get_width() - (hud_size[0] + 20), 20),
-                                      damage_stat_image, self.hud_group, 'damage_icon')
+        damage_stat_icon = HUDobject((screen.get_width() - (hud_size[0] + 20), 20),
+                                     damage_stat_image, self.hud_group, 'damage_icon')
         self.hud_elements['damage_icon'] = damage_stat_icon
 
         # create the damage stat text
@@ -50,8 +50,8 @@ class HUD:
         # create the movement speed stat icon
         movement_speed_stat_image = pygame.image.load('../textures/32X32/HUD/movement_speed_stat.png').convert()
         movement_speed_stat_image = pygame.transform.scale(movement_speed_stat_image, hud_size)
-        movement_speed_stat_icon = HUD_object((screen.get_width() - (hud_size[0] + 20) * 2, 20),
-                                              movement_speed_stat_image, self.hud_group, 'speed_icon')
+        movement_speed_stat_icon = HUDobject((screen.get_width() - (hud_size[0] + 20) * 2, 20),
+                                             movement_speed_stat_image, self.hud_group, 'speed_icon')
         self.hud_elements['speed_icon'] = movement_speed_stat_icon
 
         # create the movement speed stat text
@@ -62,7 +62,7 @@ class HUD:
         # hud icon to open the players inventory
         inventory_icon_image = pygame.image.load('../textures/32X32/HUD/inventory_button.png').convert()
         inventory_icon_image = pygame.transform.scale(inventory_icon_image, hud_size)
-        inventory_icon = HUD_object((20, 50), inventory_icon_image, self.hud_group, 'inventory_icon')
+        inventory_icon = HUDobject((20, 50), inventory_icon_image, self.hud_group, 'inventory_icon')
         self.hud_elements['inventory_icon'] = inventory_icon
 
     # update the position of hud elements match the screen size____________________________________
