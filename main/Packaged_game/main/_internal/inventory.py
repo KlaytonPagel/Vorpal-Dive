@@ -1,7 +1,7 @@
 import json
 
 import pygame
-from sprites import HUD_object
+from sprites import HUDobject
 
 
 class Inventory:
@@ -33,16 +33,16 @@ class Inventory:
 
         # the inventory in its open state
         inventory_image = pygame.image.load('../textures/32X32/HUD/inventory.png').convert_alpha()
-        inventory = HUD_object((84, 50), inventory_image,
-                               self.inventory_group, 'inventory')
+        inventory = HUDobject((84, 50), inventory_image,
+                              self.inventory_group, 'inventory')
         self.inventory_menu = inventory
 
         # load each occupied slot in the inventory
         for slot in self.inventory_slots:
             item = pygame.image.load(self.item_IDs[self.inventory_slots[slot][1]][0]).convert_alpha()
             item = pygame.transform.scale(item, (64, 64))
-            item = HUD_object(self.inventory_slots[slot][0], item, self.inventory_group,
-                              self.inventory_slots[slot][1], slot)
+            item = HUDobject(self.inventory_slots[slot][0], item, self.inventory_group,
+                             self.inventory_slots[slot][1], slot)
             self.inventory_items.append(item)
 
     # keep the players inventory open______________________________________________________________
@@ -56,9 +56,9 @@ class Inventory:
     # creates the buttons to swap selected item with the equipped or secondary item________________
     def swap_item_buttons(self, position):
         equip_button_image = pygame.image.load('../textures/32X32/HUD/equip_button.png')
-        equip_button = HUD_object(position, equip_button_image, self.hud_group, 'equip')
+        equip_button = HUDobject(position, equip_button_image, self.hud_group, 'equip')
         secondary_button_image = pygame.image.load('../textures/32X32/HUD/secondary_button.png')
-        HUD_object(equip_button.rect.bottomleft, secondary_button_image, self.hud_group, 'secondary')
+        HUDobject(equip_button.rect.bottomleft, secondary_button_image, self.hud_group, 'secondary')
 
     # swaps the players selected item with the equipped or secondary item__________________________
     def swap_items(self, option, item):
