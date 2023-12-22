@@ -44,6 +44,7 @@ class Player(pygame.sprite.Sprite):
         self.attack_cooldown = pygame.time.get_ticks()
         self.player_damage = 10
         self.swing_image_index = 0
+        self.attack_speed = 1
 
         # default player stats
         self.player_speed = 5
@@ -197,6 +198,7 @@ class Player(pygame.sprite.Sprite):
         weapon_id = self.inventory.inventory_slots['equipped'][1]
         weapon = self.inventory.item_IDs[weapon_id]
         self.adjust_damage(weapon[2])
+        self.attack_speed = weapon[3]
         return Weapon(self.rect.midright, weapon[0], (self.visible_group, self.weapon_group),
                       (tile_size, tile_size), weapon[2], weapon[1])
 
@@ -307,7 +309,7 @@ class Player(pygame.sprite.Sprite):
 
         # Shooting cooldown
         if not self.can_attack:
-            if current_time - self.attack_cooldown > 1000 // projectile_fire_rate:
+            if current_time - self.attack_cooldown > 1000 // self.attack_speed:
                 self.can_attack = True
 
     # adjust the players maximum health____________________________________________________________

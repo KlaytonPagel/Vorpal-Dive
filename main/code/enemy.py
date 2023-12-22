@@ -37,7 +37,7 @@ class Enemy(pygame.sprite.Sprite):
     # enemy cool downs____________________________________________________________________________
     def cool_downs(self):
         current_time = pygame.time.get_ticks()
-        if current_time - self.invincible_cool_down >= 100:
+        if current_time - self.invincible_cool_down >= 300:
             self.invincible = False
 
     # move towards the player if within range______________________________________________________
