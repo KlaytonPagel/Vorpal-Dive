@@ -14,6 +14,9 @@ class Enemy(pygame.sprite.Sprite):
         self.rect = self.rect.inflate(0, -10)
         self.enemy_direction = pygame.math.Vector2()
 
+        self.invincible = False
+        self.invincible_cool_down = pygame.time.get_ticks()
+
         # enemy health setup
         self.current_health = 20
 
@@ -28,7 +31,14 @@ class Enemy(pygame.sprite.Sprite):
     # update the enemy every frame_________________________________________________________________
     def update(self, player_position):
         self.enemy_pathfinding(player_position)
-        self.check_projectile_collision()
+        self.check_weapon_collision()
+        self.cool_downs()
+
+    # enemy cool downs____________________________________________________________________________
+    def cool_downs(self):
+        current_time = pygame.time.get_ticks()
+        if current_time - self.invincible_cool_down >= 100:
+            self.invincible = False
 
     # move towards the player if within range______________________________________________________
     def enemy_pathfinding(self, player_position):
@@ -73,18 +83,22 @@ class Enemy(pygame.sprite.Sprite):
                 self.position_x, self.position_y = self.rect.center
 
     # check for collision between enemy and a projectile___________________________________________
-    def check_projectile_collision(self):
+    def check_weapon_collision(self):
         if collision:
 
             # check projectile collision
             for sprite in self.weapon_group.sprites():
-                if self.rect.colliderect(sprite):
-                    if sprite.weapon_type == 'projectile':
-                        sprite.kill()
-                    self.adjust_current_health(-sprite.damage)
-                    if self.enemy_direction.x != 0:
-                        self.rect.x += self.enemy_direction.x * -tile_size
-                        self.check_obstacle_collisions('horizontal')
-                    if self.enemy_direction.y != 0:
-                        self.rect.y += self.enemy_direction.y * -tile_size
-                        self.check_obstacle_collisions('vertical')
+                if self.rect.colliderect(sprite) and not self.invincible:
+                    if sprite.weapon_type != 'melee' and sprite.weapon_type != 'range':
+                        if sprite.weapon_type == 'projectile':
+                            sprite.kill()
+                        if sprite.weapon_type == 'animation':
+                            self.invincible = True
+                            self.invincible_cool_down = pygame.time.get_ticks()
+                        self.adjust_current_health(-sprite.damage)
+                        if self.enemy_direction.x != 0:
+                            self.rect.x += self.enemy_direction.x * -tile_size
+                            self.check_obstacle_collisions('horizontal')
+                        if self.enemy_direction.y != 0:
+                            self.rect.y += self.enemy_direction.y * -tile_size
+                            self.check_obstacle_collisions('vertical')
