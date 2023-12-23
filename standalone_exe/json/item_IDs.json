@@ -1,0 +1,6 @@
+{
+  "0": ["textures/32X32/HUD/blank.png", "none", 0, 1],
+  "1": ["textures/32X32/HUD/wooden_sword_hud.png", "melee", 15, 2],
+  "2": ["textures/32X32/HUD/wooden_gun_hud.png", "range", 10, 1],
+  "3": ["textures/32X32/Healthpotion1.png", "health", 20, 1]
+}
