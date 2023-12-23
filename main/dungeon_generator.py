@@ -1,4 +1,4 @@
-import random
+import random_number as random
 import pygame
 from sprites import Tile
 from config import *
