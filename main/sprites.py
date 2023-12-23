@@ -21,7 +21,6 @@ class HUDobject(pygame.sprite.Sprite):
         self.name = name
         self.slot = slot
 
-
 class Text(pygame.sprite.Sprite):
     def __init__(self, pos, words, group, size, color, name='default'):
         super().__init__(group)

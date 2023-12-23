@@ -6,6 +6,7 @@ from projectiles import Projectile
 from sprites import Weapon, WeaponAnimation
 from HUD import HUD
 from inventory import Inventory
+from settings_screen import Settings
 
 
 # A class to create and manage the player character________________________________________________
@@ -50,8 +51,10 @@ class Player(pygame.sprite.Sprite):
         self.player_speed = 5
 
         self.paused = False
+        self.mobile_mode = False
         self.inventory_opened = False
         self.option_opened = False
+        self.settings_opened = False
         self.just_closed_option = False
         self.selected_item = None
         self.inventory = Inventory(self.hud_group)
@@ -60,6 +63,7 @@ class Player(pygame.sprite.Sprite):
         self.load_player_data()
         self.hud_elements = {}
         self.HUD = HUD(self.hud_group, self.hud_elements, self.player_data)
+        self.settings_menu = Settings()
 
         # create the players weapon
         self.current_weapon = self.create_weapon()
@@ -89,18 +93,19 @@ class Player(pygame.sprite.Sprite):
         keys = pygame.key.get_pressed()
 
         # movement Keys
-        if keys[pygame.K_w]:
-            self.player_direction.y = -1
-        elif keys[pygame.K_s]:
-            self.player_direction.y = 1
-        else:
-            self.player_direction.y = 0
-        if keys[pygame.K_d]:
-            self.player_direction.x = 1
-        elif keys[pygame.K_a]:
-            self.player_direction.x = -1
-        else:
-            self.player_direction.x = 0
+        if not self.mobile_mode:
+            if keys[pygame.K_w]:
+                self.player_direction.y = -1
+            elif keys[pygame.K_s]:
+                self.player_direction.y = 1
+            else:
+                self.player_direction.y = 0
+            if keys[pygame.K_d]:
+                self.player_direction.x = 1
+            elif keys[pygame.K_a]:
+                self.player_direction.x = -1
+            else:
+                self.player_direction.x = 0
 
         # mouse inputs
         for event in event_list:
@@ -111,9 +116,26 @@ class Player(pygame.sprite.Sprite):
                 if self.hud_elements['inventory_icon'].rect.collidepoint(x, y):
                     if not self.inventory_opened:
                         self.inventory_opened = True
+                        self.settings_opened = False
                         self.inventory.update_inventory()
                     else:
                         self.inventory_opened = False
+
+                # if player presses the settings menu button
+                if self.hud_elements['setting_icon'].rect.collidepoint(x, y):
+                    if not self.settings_opened:
+                        self.settings_opened = True
+                        self.inventory_opened = False
+                    else:
+                        self.settings_opened = False
+
+                if self.settings_opened:
+                    if self.settings_menu.settings_options['mobile_mode'].rect.collidepoint(x, y):
+                        if self.mobile_mode:
+                            self.mobile_mode = False
+                        else:
+                            self.mobile_mode = True
+
 
                 # if an option window is open
                 if self.option_opened:
@@ -139,15 +161,55 @@ class Player(pygame.sprite.Sprite):
                                 self.selected_item = item
                     self.just_closed_option = False
 
-                if self.current_weapon.weapon_type == 'range':
-                    self.shooting = True
-                if self.current_weapon.weapon_type == 'melee':
-                    self.set_direction((x, y))
-                    self.swinging = True
+                if not self.mobile_mode:
+                    if self.current_weapon.weapon_type == 'range':
+                        self.shooting = True
+                    if self.current_weapon.weapon_type == 'melee':
+                        self.set_direction((x, y))
+                        self.swinging = True
+
+                if self.mobile_mode:
+                    # movement
+                    if self.hud_elements['up_arrow'].rect.collidepoint(x, y):
+                        self.player_direction.y = -1
+                    if self.hud_elements['right_arrow'].rect.collidepoint(x, y):
+                        self.player_direction.x = 1
+                    if self.hud_elements['down_arrow'].rect.collidepoint(x, y):
+                        self.player_direction.y = 1
+                    if self.hud_elements['left_arrow'].rect.collidepoint(x, y):
+                        self.player_direction.x = -1
+
+                    # attacking
+                    if self.hud_elements['up_attack'].rect.collidepoint(x, y):
+                        self.swing_direction = 'up'
+                        if self.current_weapon.weapon_type == 'melee':
+                            self.swinging = True
+                        if self.current_weapon.weapon_type == 'range':
+                            self.shooting = True
+                    if self.hud_elements['right_attack'].rect.collidepoint(x, y):
+                        self.swing_direction = 'right'
+                        if self.current_weapon.weapon_type == 'melee':
+                            self.swinging = True
+                        if self.current_weapon.weapon_type == 'range':
+                            self.shooting = True
+                    if self.hud_elements['down_attack'].rect.collidepoint(x, y):
+                        self.swing_direction = 'down'
+                        if self.current_weapon.weapon_type == 'melee':
+                            self.swinging = True
+                        if self.current_weapon.weapon_type == 'range':
+                            self.shooting = True
+                    if self.hud_elements['left_attack'].rect.collidepoint(x, y):
+                        self.swing_direction = 'left'
+                        if self.current_weapon.weapon_type == 'melee':
+                            self.swinging = True
+                        if self.current_weapon.weapon_type == 'range':
+                            self.shooting = True
 
             if event.type == pygame.MOUSEBUTTONUP:
                 if event.button == 1:
                     self.shooting = False
+                if self.mobile_mode:
+                    self.player_direction = pygame.math.Vector2(0, 0)
 
             if event.type == pygame.KEYDOWN and event.key == pygame.K_q:
                 self.swap_weapon()
@@ -195,6 +257,9 @@ class Player(pygame.sprite.Sprite):
 
         if self.inventory_opened:
             self.inventory.display_inventory()
+
+        if self.settings_opened:
+            self.settings_menu.update_settings_menu(self.mobile_mode)
 
     # create the players weapon____________________________________________________________________
     def create_weapon(self):
@@ -249,8 +314,18 @@ class Player(pygame.sprite.Sprite):
     def shoot(self):
         screen = pygame.display.get_surface()
         if self.shooting and self.can_attack:
+            if self.mobile_mode:
+                if self.swing_direction == 'right':
+                    end_point = pygame.math.Vector2(screen.get_width() // 2 + 10, screen.get_height() // 2)
+                elif self.swing_direction == 'down':
+                    end_point = pygame.math.Vector2(screen.get_width() // 2, screen.get_height() // 2 + 10)
+                elif self.swing_direction == 'left':
+                    end_point = pygame.math.Vector2(screen.get_width() // 2 - 10, screen.get_height() // 2)
+                else:
+                    end_point = pygame.math.Vector2(screen.get_width() // 2, screen.get_height() // 2 - 10)
+            else:
+                end_point = pygame.math.Vector2(pygame.mouse.get_pos())
             starting_point = pygame.math.Vector2(screen.get_width() // 2, screen.get_height() // 2)
-            end_point = pygame.math.Vector2(pygame.mouse.get_pos())
 
             Projectile((self.visible_group, self.weapon_group), self.rect.center,
                        starting_point, end_point, self.obstacle_group, self.player_damage)
@@ -382,12 +457,11 @@ class Player(pygame.sprite.Sprite):
                 for sprite in self.enemy_group.sprites():
                     if self.rect.colliderect(sprite):
                         self.adjust_current_health(-10)
-                        self.player_direction = sprite.enemy_direction
                         if sprite.enemy_direction.x != 0:
-                            self.rect.x += self.player_direction.x * 15
+                            self.rect.x += sprite.enemy_direction.x * 15
                             self.check_obstacle_collisions('horizontal')
-                        if self.player_direction.y != 0:
-                            self.rect.y += self.player_direction.y * 15
+                        if sprite.enemy_direction.y != 0:
+                            self.rect.y += sprite.enemy_direction.y * 15
                             self.check_obstacle_collisions('vertical')
                         self.invincible = True
                         self.invincibility_cooldown = 0

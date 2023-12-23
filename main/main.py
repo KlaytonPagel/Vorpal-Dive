@@ -42,12 +42,25 @@ class VisibleGroup(pygame.sprite.Group):
             screen.blit(sprite.image, offset_pos)
 
 
+class HUDGroup(pygame.sprite.Group):
+    def __init__(self):
+        super().__init__()
+
+    # custom draw function to allow only specific objects to be drawn______________________________
+    def custom_draw(self, screen):
+        for sprite in self.sprites():
+            if sprite.name != 'mobile':
+                screen.blit(sprite.image, sprite.rect)
+            elif player.mobile_mode:
+                screen.blit(sprite.image, sprite.rect)
+
+
 # Declare groups___________________________________________________________________________________
 visible_group = VisibleGroup()
+hud_group = HUDGroup()
 obstacle_group = pygame.sprite.Group()
 weapon_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
-hud_group = pygame.sprite.Group()
 
 # create objects___________________________________________________________________________________
 dungeon = Dungeon(visible_group, obstacle_group)
@@ -76,7 +89,7 @@ async def main():
         enemy_group.update(player.rect.center)
         debug.image = pygame.font.Font(None, 50).render((str(round(clock.get_fps()))), True, (255, 255, 255))
 
-        hud_group.draw(screen)
+        hud_group.custom_draw(screen)
 
         pygame.display.flip()
         clock.tick(fps)

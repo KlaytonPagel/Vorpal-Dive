@@ -65,6 +65,74 @@ class HUD:
         inventory_icon = HUDobject((20, 50), inventory_icon_image, self.hud_group, 'inventory_icon')
         self.hud_elements['inventory_icon'] = inventory_icon
 
+        # hud icon to open the players setting menu
+        inventory_icon_image = pygame.image.load('textures/32X32/HUD/settings_icon.png').convert()
+        inventory_icon_image = pygame.transform.scale(inventory_icon_image, hud_size)
+        inventory_icon = HUDobject((20, 114), inventory_icon_image, self.hud_group, 'setting_icon')
+        self.hud_elements['setting_icon'] = inventory_icon
+
+        # Mobile controls______________________________________________
+        # Up movement button
+        up_arrow_image = pygame.image.load('textures/32X32/HUD/move_arrow.png').convert()
+        up_arrow_image = pygame.transform.scale(up_arrow_image, (hud_size[0]*2, hud_size[1]*2))
+        up_arrow_icon = HUDobject((168, screen.get_height() - 294), up_arrow_image,
+                                  self.hud_group, 'mobile')
+        self.hud_elements['up_arrow'] = up_arrow_icon
+
+        # right movement button
+        right_arrow_image = pygame.image.load('textures/32X32/HUD/move_arrow.png').convert()
+        right_arrow_image = pygame.transform.scale(right_arrow_image, (hud_size[0]*2, hud_size[1]*2))
+        right_arrow_image = pygame.transform.rotate(right_arrow_image, 270)
+        right_arrow_icon = HUDobject((314, screen.get_height() - 148), right_arrow_image,
+                                     self.hud_group, 'mobile')
+        self.hud_elements['right_arrow'] = right_arrow_icon
+
+        # down movement button
+        down_arrow_image = pygame.image.load('textures/32X32/HUD/move_arrow.png').convert()
+        down_arrow_image = pygame.transform.scale(down_arrow_image, (hud_size[0]*2, hud_size[1]*2))
+        down_arrow_image = pygame.transform.rotate(down_arrow_image, 180)
+        down_arrow_icon = HUDobject((168, screen.get_height() - 148), down_arrow_image,
+                                    self.hud_group, 'mobile')
+        self.hud_elements['down_arrow'] = down_arrow_icon
+
+        # left movement button
+        left_arrow_image = pygame.image.load('textures/32X32/HUD/move_arrow.png').convert()
+        left_arrow_image = pygame.transform.scale(left_arrow_image, (hud_size[0]*2, hud_size[1]*2))
+        left_arrow_image = pygame.transform.rotate(left_arrow_image, 90)
+        left_arrow_icon = HUDobject((20, screen.get_height() - 148), left_arrow_image,
+                                    self.hud_group, 'mobile')
+        self.hud_elements['left_arrow'] = left_arrow_icon
+
+        # up attack button
+        up_attack_image = pygame.image.load('textures/32X32/HUD/attack_arrow.png').convert()
+        up_attack_image = pygame.transform.scale(up_attack_image, (hud_size[0] * 2, hud_size[1] * 2))
+        up_attack_icon = HUDobject((screen.get_width()-296, screen.get_height() - 294), up_attack_image,
+                                   self.hud_group, 'mobile')
+        self.hud_elements['up_attack'] = up_attack_icon
+
+        # right attack button
+        right_attack_image = pygame.image.load('textures/32X32/HUD/attack_arrow.png').convert()
+        right_attack_image = pygame.transform.scale(right_attack_image, (hud_size[0] * 2, hud_size[1] * 2))
+        right_attack_image = pygame.transform.rotate(right_attack_image, 270)
+        right_attack_icon = HUDobject((screen.get_width()-144, screen.get_height() - 148), right_attack_image,
+                                      self.hud_group, 'mobile')
+        self.hud_elements['right_attack'] = right_attack_icon
+
+        # down attack button
+        down_attack_image = pygame.image.load('textures/32X32/HUD/attack_arrow.png').convert()
+        down_attack_image = pygame.transform.scale(down_attack_image, (hud_size[0] * 2, hud_size[1] * 2))
+        down_attack_image = pygame.transform.rotate(down_attack_image, 180)
+        down_attack_icon = HUDobject((screen.get_width()-296, screen.get_height() - 148), down_attack_image,
+                                     self.hud_group, 'mobile')
+        self.hud_elements['down_attack'] = down_attack_icon
+
+        # left attack button
+        left_attack_image = pygame.image.load('textures/32X32/HUD/attack_arrow.png').convert()
+        left_attack_image = pygame.transform.scale(left_attack_image, (hud_size[0] * 2, hud_size[1] * 2))
+        left_attack_image = pygame.transform.rotate(left_attack_image, 90)
+        left_attack_icon = HUDobject((screen.get_width()-442, screen.get_height() - 148), left_attack_image, self.hud_group, 'mobile')
+        self.hud_elements['left_attack'] = left_attack_icon
+
     # update the position of hud elements match the screen size____________________________________
     def update_hud(self):
         hud_size = (64, 64)
@@ -76,3 +144,7 @@ class HUD:
         self.hud_elements['speed_icon'].rect.topleft = (screen.get_width() - (hud_size[0] + 20) * 2, 20)
         self.hud_elements['movement_speed_stat'].rect.center = (self.hud_elements['speed_icon'].rect.centerx,
                                                                 self.hud_elements['speed_icon'].rect.centery + 15)
+
+    def mobile_controls(self):
+        hud_size = (64, 64)
+
