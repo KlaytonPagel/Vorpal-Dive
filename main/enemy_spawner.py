@@ -1,4 +1,4 @@
-import random
+import random_number as random
 from config import *
 from enemy import Enemy
 

@@ -457,11 +457,14 @@ class Player(pygame.sprite.Sprite):
                 for sprite in self.enemy_group.sprites():
                     if self.rect.colliderect(sprite):
                         self.adjust_current_health(-10)
-                        if sprite.enemy_direction.x != 0:
-                            self.rect.x += sprite.enemy_direction.x * 15
+                        self.player_direction = sprite.enemy_direction
+                        if self.player_direction.x != 0:
+                            self.rect.x += self.player_direction.x * 15
                             self.check_obstacle_collisions('horizontal')
-                        if sprite.enemy_direction.y != 0:
-                            self.rect.y += sprite.enemy_direction.y * 15
+                            self.player_direction.x = 0
+                        if self.player_direction.y != 0:
+                            self.rect.y += self.player_direction.y * 15
                             self.check_obstacle_collisions('vertical')
+                            self.player_direction.y = 0
                         self.invincible = True
                         self.invincibility_cooldown = 0
