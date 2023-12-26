@@ -459,11 +459,11 @@ class Player(pygame.sprite.Sprite):
                         self.adjust_current_health(-10)
                         self.player_direction = sprite.enemy_direction
                         if self.player_direction.x != 0:
-                            self.rect.x += self.player_direction.x * 15
+                            self.rect.x += self.player_direction.x * tile_size/2
                             self.check_obstacle_collisions('horizontal')
                             self.player_direction.x = 0
                         if self.player_direction.y != 0:
-                            self.rect.y += self.player_direction.y * 15
+                            self.rect.y += self.player_direction.y * tile_size/2
                             self.check_obstacle_collisions('vertical')
                             self.player_direction.y = 0
                         self.invincible = True

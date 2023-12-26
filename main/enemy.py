@@ -18,7 +18,7 @@ class Enemy(pygame.sprite.Sprite):
         self.invincible_cool_down = pygame.time.get_ticks()
 
         # enemy health setup
-        self.current_health = 20
+        self.current_health = 200000
 
         # position set up
         self.starting_position = pygame.math.Vector2(position)
@@ -96,9 +96,10 @@ class Enemy(pygame.sprite.Sprite):
                             self.invincible = True
                             self.invincible_cool_down = pygame.time.get_ticks()
                         self.adjust_current_health(-sprite.damage)
+                        self.enemy_direction = -self.enemy_direction
                         if self.enemy_direction.x != 0:
-                            self.rect.x += self.enemy_direction.x * -tile_size
+                            self.rect.x += self.enemy_direction.x * tile_size/2
                             self.check_obstacle_collisions('horizontal')
                         if self.enemy_direction.y != 0:
-                            self.rect.y += self.enemy_direction.y * -tile_size
+                            self.rect.y += self.enemy_direction.y * tile_size/2
                             self.check_obstacle_collisions('vertical')
