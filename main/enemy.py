@@ -18,7 +18,7 @@ class Enemy(pygame.sprite.Sprite):
         self.invincible_cool_down = pygame.time.get_ticks()
 
         # enemy health setup
-        self.current_health = 200000
+        self.current_health = 20
 
         # position set up
         self.starting_position = pygame.math.Vector2(position)
