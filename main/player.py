@@ -1,6 +1,7 @@
 import pygame
 import json
 import os
+import time
 from config import *
 from projectiles import Projectile
 from sprites import Weapon, WeaponAnimation
@@ -26,13 +27,15 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
         self.rect = self.image.get_rect(topleft=position)
         self.rect = self.rect.inflate(0, -10)
+        self.player_x_position = self.rect.x
+        self.player_y_position = self.rect.y
         self.position = position
         self.player_direction = pygame.math.Vector2()
 
         # default health values
         self.max_health = 100
         self.current_health = 100
-        self.invincibility_cooldown = fps // 2
+        self.invincibility_cooldown = time.time()
         self.invincible = False
 
         # Default attacking values
@@ -136,7 +139,6 @@ class Player(pygame.sprite.Sprite):
                         else:
                             self.mobile_mode = True
 
-
                 # if an option window is open
                 if self.option_opened:
                     for option in self.hud_group:
@@ -225,7 +227,7 @@ class Player(pygame.sprite.Sprite):
                 self.inventory.save_inventory()
 
     # Update all player function___________________________________________________________________
-    def update(self, event_list):
+    def update(self, event_list, delta_time):
 
         # Move the player
         self.player_input(event_list)
@@ -233,17 +235,19 @@ class Player(pygame.sprite.Sprite):
             self.player_direction = self.player_direction.normalize()
 
         if self.player_direction.x != 0:
-            self.rect.x += self.player_direction.x * self.player_speed
+            self.player_x_position += self.player_direction.x * self.player_speed * delta_time
+            self.rect.x = round(self.player_x_position)
             self.check_obstacle_collisions('horizontal')
         if self.player_direction.y != 0:
-            self.rect.y += self.player_direction.y * self.player_speed
+            self.player_y_position += self.player_direction.y * self.player_speed * delta_time
+            self.rect.y = round(self.player_y_position)
             self.check_obstacle_collisions('vertical')
 
         self.check_enemy_collision()
         self.cool_downs()
 
         # update all projectile and weapon animations
-        self.update_weapon_effects()
+        self.update_weapon_effects(delta_time)
 
         if self.current_weapon.weapon_type == 'range':
             self.shoot()
@@ -376,10 +380,10 @@ class Player(pygame.sprite.Sprite):
                 self.attack_cooldown = pygame.time.get_ticks()
 
     # update all weapon projectiles and animations_________________________________________________
-    def update_weapon_effects(self):
+    def update_weapon_effects(self, delta_time):
         for effect in self.weapon_group:
             if effect.weapon_type == 'projectile':
-                effect.update()
+                effect.update(delta_time)
 
     # all player cool downs________________________________________________________________________
     def cool_downs(self):
@@ -428,28 +432,35 @@ class Player(pygame.sprite.Sprite):
 
     # Check for any collisions between the player and obstacles____________________________________
     def check_obstacle_collisions(self, direction):
+        tolerance = 10
         if collision:
 
             # Check obstacle collision
             for sprite in self.obstacle_group.sprites():
                 if direction == 'horizontal':
                     if self.rect.colliderect(sprite) and self.player_direction.x > 0:
+                        self.player_x_position = sprite.rect.left - tile_size
                         self.rect.right = sprite.rect.left
                     elif self.rect.colliderect(sprite) and self.player_direction.x < 0:
+                        self.player_x_position = sprite.rect.right
                         self.rect.left = sprite.rect.right
                 if direction == 'vertical':
                     if self.rect.colliderect(sprite) and self.player_direction.y < 0:
+                        self.player_y_position = sprite.rect.bottom
                         self.rect.top = sprite.rect.bottom
                     elif self.rect.colliderect(sprite) and self.player_direction.y > 0:
+                        self.player_y_position = sprite.rect.top - (tile_size // 1.5)
                         self.rect.bottom = sprite.rect.top
 
     # check for any collisions between the player and enemies______________________________________
     def check_enemy_collision(self):
         if collision:
 
+            current_time = time.time()
+
             if self.invincible:
                 self.invincibility_cooldown += 1
-                if self.invincibility_cooldown >= fps // 2:
+                if current_time - self.invincibility_cooldown >= 500:
                     self.invincible = False
 
             else:
@@ -467,4 +478,4 @@ class Player(pygame.sprite.Sprite):
                             self.check_obstacle_collisions('vertical')
                             self.player_direction.y = 0
                         self.invincible = True
-                        self.invincibility_cooldown = 0
+                        self.invincibility_cooldown = time.time()

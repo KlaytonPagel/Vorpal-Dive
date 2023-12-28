@@ -31,13 +31,13 @@ class Projectile(pygame.sprite.Sprite):
         self.damage = damage
 
     # update the projectiles position______________________________________________________________
-    def update(self):
+    def update(self, delta_time):
         # normalize the direction vector so the length of the line doesn't affect projectile speed
         self.projectile_direction = (self.end_point - self.starting_point).normalize()
 
         # update the floating point variables
-        self.position_x += self.projectile_direction.x * projectile_speed
-        self.position_y += self.projectile_direction.y * projectile_speed
+        self.position_x += self.projectile_direction.x * projectile_speed * delta_time
+        self.position_y += self.projectile_direction.y * projectile_speed * delta_time
         self.rect.center = (self.position_x, self.position_y)
 
         # update to projectiles traveled distance
@@ -57,5 +57,5 @@ class Projectile(pygame.sprite.Sprite):
 
     # check if the distance the projectile has traveled exceeds the range__________________________
     def check_distance(self):
-        if self.projectile_distance > projectile_range * tile_size:
+        if self.projectile_distance > projectile_range * tile_size * projectile_speed:
             self.kill()

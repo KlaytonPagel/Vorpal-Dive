@@ -29,8 +29,8 @@ class Enemy(pygame.sprite.Sprite):
         self.weapon_group = weapon_group
 
     # update the enemy every frame_________________________________________________________________
-    def update(self, player_position):
-        self.enemy_pathfinding(player_position)
+    def update(self, player_position, delta_time):
+        self.enemy_pathfinding(player_position, delta_time)
         self.check_weapon_collision()
         self.cool_downs()
 
@@ -41,7 +41,7 @@ class Enemy(pygame.sprite.Sprite):
             self.invincible = False
 
     # move towards the player if within range______________________________________________________
-    def enemy_pathfinding(self, player_position):
+    def enemy_pathfinding(self, player_position, delta_time):
         # normalize the direction vector so the length of the line doesn't affect enemy speed
         if (abs(player_position[0] - self.position_x) <= enemy_agro_range * tile_size and
                 abs(player_position[1] - self.position_y) <= enemy_agro_range * tile_size):
@@ -52,9 +52,9 @@ class Enemy(pygame.sprite.Sprite):
                 pass
 
             # update the floating point variables
-            self.rect.x += self.enemy_direction.x * enemy_speed
+            self.rect.x += self.enemy_direction.x * enemy_speed * delta_time
             self.check_obstacle_collisions('horizontal')
-            self.rect.y += self.enemy_direction.y * enemy_speed
+            self.rect.y += self.enemy_direction.y * enemy_speed * delta_time
             self.check_obstacle_collisions('vertical')
             self.rect.center = (self.position_x, self.position_y)
 

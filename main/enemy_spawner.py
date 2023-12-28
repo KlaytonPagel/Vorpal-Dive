@@ -1,3 +1,4 @@
+import time
 import random_number as random
 from config import *
 from enemy import Enemy
@@ -13,7 +14,7 @@ class EnemySpawner:
         self.projectile_group = projectile_group
 
         self.can_spawn = True
-        self.spawn_cooldown = fps
+        self.spawn_cooldown = time.time()
 
     # Spawn an enemy on a floor tile not close to the player_______________________________________
     def spawn_enemy(self, player_location):
@@ -29,8 +30,8 @@ class EnemySpawner:
 
         # enemy spawning cooldown
         if not self.can_spawn:
-            self.spawn_cooldown += 1
-            if self.spawn_cooldown >= fps:
+            current_time = time.time()
+            if current_time - self.spawn_cooldown >= 1:
                 self.can_spawn = True
 
         # try to spawn an enemy based off of spawn chance in the config
@@ -38,4 +39,4 @@ class EnemySpawner:
             if random.randint(1, 100/spawn_chance_per_second) == 1:
                 self.spawn_enemy(player_location)
             self.can_spawn = False
-            self.spawn_cooldown = 0
+            self.spawn_cooldown = time.time()

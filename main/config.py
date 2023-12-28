@@ -1,6 +1,5 @@
 # general settings_________________________________________________________________________________
 screen_width, screen_height = 1400, 800
-fps = 60
 collision = True
 
 # Dungeon setting__________________________________________________________________________________
@@ -12,11 +11,10 @@ room_attempts = 25
 tunnel_width = 3
 
 # Shooting Settings________________________________________________________________________________
-projectile_speed = 2
-projectile_fire_rate = 1
+projectile_speed = 170
 projectile_range = 5
 
 # Enemy Spawn Settings_____________________________________________________________________________
 spawn_chance_per_second = 10
 enemy_agro_range = 10
-enemy_speed = 2
+enemy_speed = 130

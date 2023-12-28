@@ -1,5 +1,6 @@
 import pygame
 import asyncio
+import time
 from pygame.locals import *
 from config import *
 from dungeon_generator import Dungeon
@@ -68,11 +69,14 @@ player = Player(visible_group, dungeon.player_start_position, visible_group,
                 obstacle_group, weapon_group, enemy_group, hud_group)
 enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, visible_group, enemy_group, obstacle_group, weapon_group)
 
-debug = Text((screen_width - 72, screen_height - 72), str(round(clock.get_fps())), hud_group, 50, (255, 255, 255))
+debug = Text((screen_width - 75, screen_height - 75), str(round(clock.get_fps())), hud_group, 50, (255, 255, 255))
+
+last_frame_time = time.time()
 
 
 async def main():
-    global running
+    global running, last_frame_time
+
     while running:
         event_list = pygame.event.get()
         for event in event_list:
@@ -81,18 +85,21 @@ async def main():
                 player.inventory.save_inventory()
                 running = False
 
+        dt = time.time() - last_frame_time
+        last_frame_time = time.time()
+
         screen.fill((0, 0, 0))
         visible_group.custom_draw()
-        player.update(event_list)
+        player.update(event_list, dt)
 
         enemy_spawner.decide_spawn_enemy(player.rect.center)
-        enemy_group.update(player.rect.center)
+        enemy_group.update(player.rect.center, dt)
         debug.image = pygame.font.Font(None, 50).render((str(round(clock.get_fps()))), True, (255, 255, 255))
 
         hud_group.custom_draw(screen)
 
         pygame.display.flip()
-        clock.tick(fps)
+        clock.tick()
         await asyncio.sleep(0)
 
 asyncio.run(main())
