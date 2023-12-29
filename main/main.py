@@ -11,7 +11,7 @@ from sprites import Text
 # start pygame_____________________________________________________________________________________
 pygame.init()
 screen = pygame.display.set_mode((screen_width, screen_height), RESIZABLE)
-pygame.display.set_caption('py dungeon')
+pygame.display.set_caption('Vorpal Dive')
 running = True
 clock = pygame.time.Clock()
 
