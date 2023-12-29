@@ -101,7 +101,7 @@ class Dungeon:
         complete_floor_surface = pygame.Surface((dungeon_width, dungeon_height))
 
         # load all floor tile images and combine all tiles onto one surface
-        floor_tile_image = pygame.image.load('textures/32X32/Floors/Floor 2.png')
+        floor_tile_image = pygame.image.load('textures/32X32/Floors/Floor 3.png')
         floor_tile_image = pygame.transform.scale(floor_tile_image, (tile_size, tile_size))
         for tile in self.floor_tile_positions:
             complete_floor_surface.blit(floor_tile_image, (tile[0], tile[1]))
@@ -109,24 +109,25 @@ class Dungeon:
 
     # Check if tiles adjacent to occupied tiles are also occupied, if not put a wall tile down_____
     def build_walls(self):
+        wall_image = 'textures/32X32/Walls/Wall front.png'
         for tile in self.floor_tile_positions:
 
             # Check tile to the right
             if (tile[0] + tile_size, tile[1]) not in self.floor_tile_positions:
                 Tile((tile[0] + tile_size, tile[1]),
-                        'textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
+                        wall_image, (self.visible_group, self.obstacle_group))
 
             # check tile to the left
             if (tile[0] - tile_size, tile[1]) not in self.floor_tile_positions:
                 Tile((tile[0] - tile_size, tile[1]),
-                        'textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
+                        wall_image, (self.visible_group, self.obstacle_group))
 
             # check tile above
             if (tile[0], tile[1] + tile_size) not in self.floor_tile_positions:
                 Tile((tile[0], tile[1] + tile_size),
-                        'textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
+                        wall_image, (self.visible_group, self.obstacle_group))
 
             # check tile below
             if (tile[0], tile[1] - tile_size) not in self.floor_tile_positions:
                 Tile((tile[0], tile[1] - tile_size),
-                        'textures/32X32/Walls/Wall front.png', (self.visible_group, self.obstacle_group))
+                        wall_image, (self.visible_group, self.obstacle_group))
