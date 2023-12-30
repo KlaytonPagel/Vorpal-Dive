@@ -15,6 +15,9 @@ projectile_speed = 170
 projectile_range = 5
 
 # Enemy Spawn Settings_____________________________________________________________________________
-spawn_chance_per_second = 10
+spawn_chance_per_second = 100
 enemy_agro_range = 10
 enemy_speed = 130
+
+
+# only check collision for tiles near the entity

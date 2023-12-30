@@ -6,12 +6,13 @@ from enemy import Enemy
 
 # Class to spawn enemies in the dungeon____________________________________________________________
 class EnemySpawner:
-    def __init__(self, spawnable_tiles, visible_group, enemy_group, obstacle_group, projectile_group):
+    def __init__(self, spawnable_tiles, grid, visible_group, enemy_group, obstacle_group, projectile_group):
         self.spawnable_tiles = spawnable_tiles
         self.visible_group = visible_group
         self.enemy_group = enemy_group
         self.obstacle_group = obstacle_group
         self.projectile_group = projectile_group
+        self.grid = grid
 
         self.can_spawn = True
         self.spawn_cooldown = time.time()
@@ -23,7 +24,7 @@ class EnemySpawner:
                 abs(player_location[1] - enemy_location[1]) <= 10 * tile_size):
             self.spawn_enemy(player_location)
         else:
-            Enemy((self.visible_group, self.enemy_group), enemy_location, self.obstacle_group, self.projectile_group)
+            Enemy((self.visible_group, self.enemy_group), enemy_location, self.grid, self.obstacle_group, self.projectile_group)
 
     # Decide weather to spawn an enemy or not______________________________________________________
     def decide_spawn_enemy(self, player_location):

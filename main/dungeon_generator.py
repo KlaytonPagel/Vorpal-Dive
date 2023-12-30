@@ -6,13 +6,18 @@ from config import *
 
 # Dungeon class for generating a random dungeon____________________________________________________
 class Dungeon:
-    def __init__(self, visible_group, obstacle_group):
+    def __init__(self, visible_group, obstacle_group, grid):
         self.floor_tile_positions = []
+        self.wall_tile_positions = {}
+        self.wall_tile_sprites = {}
+        self.grid = grid
         self.visible_group = visible_group
         self.obstacle_group = obstacle_group
         self.player_start_position = None
         self.dungeon_level = []
         self.generate_rooms()
+        self.build_floors()
+        self.build_walls()
 
     # Choose random places within dungeon size and build rooms_____________________________________
     def generate_rooms(self):
@@ -45,12 +50,9 @@ class Dungeon:
                 start_position = (room_x + room_width // 2 * tile_size, room_y + room_height // 2 * tile_size)
                 if end_position is not None:
                     self.create_tunnel(start_position, end_position)
-                else: self.player_start_position = start_position
+                else:
+                    self.player_start_position = start_position
                 end_position = (room_x + room_width // 2 * tile_size, room_y + room_height // 2 * tile_size)
-
-        # Place wall and floor images
-        self.build_floors()
-        self.build_walls()
 
     # Checks if there are already tiles in any of the spots the room will occupy___________________
     def validate_room(self, room_x, room_y, room_width, room_height):
@@ -101,7 +103,7 @@ class Dungeon:
         complete_floor_surface = pygame.Surface((dungeon_width, dungeon_height))
 
         # load all floor tile images and combine all tiles onto one surface
-        floor_tile_image = pygame.image.load('textures/32X32/Floors/Floor 3.png')
+        floor_tile_image = pygame.image.load('textures/32X32/Floors/Floor 3.png').convert()
         floor_tile_image = pygame.transform.scale(floor_tile_image, (tile_size, tile_size))
         for tile in self.floor_tile_positions:
             complete_floor_surface.blit(floor_tile_image, (tile[0], tile[1]))
@@ -114,20 +116,42 @@ class Dungeon:
 
             # Check tile to the right
             if (tile[0] + tile_size, tile[1]) not in self.floor_tile_positions:
-                Tile((tile[0] + tile_size, tile[1]),
-                        wall_image, (self.visible_group, self.obstacle_group))
+                self.wall_tile_positions[(tile[0] + tile_size, tile[1])] = wall_image
 
             # check tile to the left
             if (tile[0] - tile_size, tile[1]) not in self.floor_tile_positions:
-                Tile((tile[0] - tile_size, tile[1]),
-                        wall_image, (self.visible_group, self.obstacle_group))
+                self.wall_tile_positions[(tile[0] - tile_size, tile[1])] = wall_image
 
             # check tile above
             if (tile[0], tile[1] + tile_size) not in self.floor_tile_positions:
-                Tile((tile[0], tile[1] + tile_size),
-                        wall_image, (self.visible_group, self.obstacle_group))
+                self.wall_tile_positions[(tile[0], tile[1] + tile_size)] = wall_image
 
             # check tile below
             if (tile[0], tile[1] - tile_size) not in self.floor_tile_positions:
-                Tile((tile[0], tile[1] - tile_size),
-                        wall_image, (self.visible_group, self.obstacle_group))
+                self.wall_tile_positions[(tile[0], tile[1] - tile_size)] = wall_image
+
+            # check top right tile
+            if (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions:
+                self.wall_tile_positions[(tile[0] + tile_size, tile[1] + tile_size)] = wall_image
+
+            # check top left tile
+            if (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions:
+                self.wall_tile_positions[(tile[0] - tile_size, tile[1] + tile_size)] = wall_image
+
+            # check bottom right tile
+            if (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions:
+                self.wall_tile_positions[(tile[0] + tile_size, tile[1] - tile_size)] = wall_image
+
+            # check bottom left tile
+            if (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions:
+                self.wall_tile_positions[(tile[0] - tile_size, tile[1] - tile_size)] = wall_image
+
+        for position, image in self.wall_tile_positions.items():
+            wall = Tile(position, image, (self.visible_group, self.obstacle_group))
+            self.wall_tile_sprites[position] = wall
+
+        self.populate_grid_tiles()
+
+    def populate_grid_tiles(self):
+        for position, wall in self.wall_tile_sprites.items():
+            self.grid.fill_grid(position, wall)

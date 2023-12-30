@@ -4,16 +4,22 @@ from config import *
 
 # class to create enemy sprites____________________________________________________________________
 class Enemy(pygame.sprite.Sprite):
-    def __init__(self, group, position, obstacle_group, weapon_group):
+    def __init__(self, group, position, grid, obstacle_group, weapon_group):
         super().__init__(group)
 
         # Enemy sprite setup
         self.image = pygame.image.load("textures/Enemy.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
-        self.rect = self.image.get_rect(topleft=position)
+        self.rect = self.image.get_rect(center=position)
         self.rect = self.rect.inflate(0, -10)
         self.enemy_direction = pygame.math.Vector2()
 
+        # grid tile location set up
+        self.grid = grid
+        self.near_tile_objects = []
+        self.current_tile = (0, 1)
+
+        # invincibility frames
         self.invincible = False
         self.invincible_cool_down = pygame.time.get_ticks()
 
@@ -40,6 +46,20 @@ class Enemy(pygame.sprite.Sprite):
         if current_time - self.invincible_cool_down >= 300:
             self.invincible = False
 
+    # set the enemies current grid tile____________________________________________________________
+    def get_current_tile(self):
+        self.current_tile = self.grid.get_grid_tile(self.rect.topleft)
+
+    # gets the tiles close to the enemy____________________________________________________________
+    def get_near_tiles(self):
+        self.near_tile_objects.clear()
+        for x in range(-1, 2):
+            for y in range(-1, 2):
+                try:
+                    for wall in self.grid.grid[(self.current_tile[0] + x, self.current_tile[1] + y)]:
+                        self.near_tile_objects.append(wall)
+                except: pass
+
     # move towards the player if within range______________________________________________________
     def enemy_pathfinding(self, player_position, delta_time):
         # normalize the direction vector so the length of the line doesn't affect enemy speed
@@ -58,6 +78,8 @@ class Enemy(pygame.sprite.Sprite):
             self.check_obstacle_collisions('vertical')
             self.rect.center = (self.position_x, self.position_y)
 
+            self.get_current_tile()
+
     # adjust the enemies health____________________________________________________________________
     def adjust_current_health(self, amount):
         self.current_health += amount
@@ -67,9 +89,10 @@ class Enemy(pygame.sprite.Sprite):
     # check for collision between enemy and obstacle_______________________________________________
     def check_obstacle_collisions(self, direction):
         if collision:
+            self.get_near_tiles()
 
             # Check obstacle collision
-            for sprite in self.obstacle_group.sprites():
+            for sprite in self.near_tile_objects:
                 if direction == 'horizontal':
                     if self.rect.colliderect(sprite) and self.enemy_direction.x > 0:
                         self.rect.right = sprite.rect.left

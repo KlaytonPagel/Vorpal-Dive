@@ -12,7 +12,7 @@ from settings_screen import Settings
 
 # A class to create and manage the player character________________________________________________
 class Player(pygame.sprite.Sprite):
-    def __init__(self, group, position, visible_group, obstacle_group, weapon_group, enemy_group, hud_group):
+    def __init__(self, group, position, grid, visible_group, obstacle_group, weapon_group, enemy_group, hud_group):
         super().__init__(group)
 
         # Define sprite groups
@@ -31,6 +31,11 @@ class Player(pygame.sprite.Sprite):
         self.player_y_position = self.rect.y
         self.position = position
         self.player_direction = pygame.math.Vector2()
+
+        # Grid system setup
+        self.grid = grid
+        self.current_tile = (0, 1)
+        self.near_tile_objects = []
 
         # default health values
         self.max_health = 100
@@ -242,6 +247,7 @@ class Player(pygame.sprite.Sprite):
             self.player_y_position += self.player_direction.y * self.player_speed * delta_time
             self.rect.y = round(self.player_y_position)
             self.check_obstacle_collisions('vertical')
+        self.get_current_tile()
 
         self.check_enemy_collision()
         self.cool_downs()
@@ -264,6 +270,10 @@ class Player(pygame.sprite.Sprite):
 
         if self.settings_opened:
             self.settings_menu.update_settings_menu(self.mobile_mode)
+
+    # sets the players current grid tile___________________________________________________________
+    def get_current_tile(self):
+        self.current_tile = self.grid.get_grid_tile(self.rect.topleft)
 
     # create the players weapon____________________________________________________________________
     def create_weapon(self):
@@ -430,13 +440,23 @@ class Player(pygame.sprite.Sprite):
             if sprite.name == 'movement_speed_stat':
                 sprite.image = pygame.font.Font(None, 30).render(str(self.player_speed), True, (255, 255, 255))
 
+    # gets the tiles close to the player___________________________________________________________
+    def get_near_tiles(self):
+        self.near_tile_objects.clear()
+        for x in range(-1, 2):
+            for y in range(-1, 2):
+                try:
+                    for wall in self.grid.grid[(self.current_tile[0] + x, self.current_tile[1] + y)]:
+                        self.near_tile_objects.append(wall)
+                except: pass
+
     # Check for any collisions between the player and obstacles____________________________________
     def check_obstacle_collisions(self, direction):
-        tolerance = 10
         if collision:
+            self.get_near_tiles()
 
             # Check obstacle collision
-            for sprite in self.obstacle_group.sprites():
+            for sprite in self.near_tile_objects:
                 if direction == 'horizontal':
                     if self.rect.colliderect(sprite) and self.player_direction.x > 0:
                         self.player_x_position = sprite.rect.left - tile_size

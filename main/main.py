@@ -7,6 +7,7 @@ from dungeon_generator import Dungeon
 from player import Player
 from enemy_spawner import EnemySpawner
 from sprites import Text
+from tile_system import Grid
 
 # start pygame_____________________________________________________________________________________
 pygame.init()
@@ -64,10 +65,12 @@ weapon_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 
 # create objects___________________________________________________________________________________
-dungeon = Dungeon(visible_group, obstacle_group)
-player = Player(visible_group, dungeon.player_start_position, visible_group,
+grid = Grid()
+dungeon = Dungeon(visible_group, obstacle_group, grid)
+player = Player(visible_group, dungeon.player_start_position, grid, visible_group,
                 obstacle_group, weapon_group, enemy_group, hud_group)
-enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, visible_group, enemy_group, obstacle_group, weapon_group)
+enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, grid, visible_group,
+                             enemy_group, obstacle_group, weapon_group)
 
 debug = Text((screen_width - 75, screen_height - 75), str(round(clock.get_fps())), hud_group, 50, (255, 255, 255))
 
