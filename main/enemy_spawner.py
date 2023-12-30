@@ -38,6 +38,7 @@ class EnemySpawner:
         # try to spawn an enemy based off of spawn chance in the config
         else:
             if random.randint(1, 100/spawn_chance_per_second) == 1:
-                self.spawn_enemy(player_location)
+                for i in range(1):
+                    self.spawn_enemy(player_location)
             self.can_spawn = False
             self.spawn_cooldown = time.time()

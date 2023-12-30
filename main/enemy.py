@@ -10,7 +10,7 @@ class Enemy(pygame.sprite.Sprite):
         # Enemy sprite setup
         self.image = pygame.image.load("textures/Enemy.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
-        self.rect = self.image.get_rect(center=position)
+        self.rect = self.image.get_rect(topleft=position)
         self.rect = self.rect.inflate(0, -10)
         self.enemy_direction = pygame.math.Vector2()
 
@@ -28,7 +28,7 @@ class Enemy(pygame.sprite.Sprite):
 
         # position set up
         self.starting_position = pygame.math.Vector2(position)
-        self.position_x, self.position_y = position
+        self.position_x, self.position_y = position[0] + tile_size // 2, position[1] + tile_size // 2
 
         # declaring sprite groups
         self.obstacle_group = obstacle_group
@@ -103,7 +103,7 @@ class Enemy(pygame.sprite.Sprite):
                         self.rect.top = sprite.rect.bottom
                     elif self.rect.colliderect(sprite) and self.enemy_direction.y > 0:
                         self.rect.bottom = sprite.rect.top
-                self.position_x, self.position_y = self.rect.center
+            self.position_x, self.position_y = self.rect.center
 
     # check for collision between enemy and a projectile___________________________________________
     def check_weapon_collision(self):

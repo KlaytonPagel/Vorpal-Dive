@@ -15,7 +15,7 @@ projectile_speed = 170
 projectile_range = 5
 
 # Enemy Spawn Settings_____________________________________________________________________________
-spawn_chance_per_second = 100
+spawn_chance_per_second = 10
 enemy_agro_range = 10
 enemy_speed = 130
 
