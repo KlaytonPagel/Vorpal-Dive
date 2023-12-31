@@ -259,7 +259,7 @@ class Player(pygame.sprite.Sprite):
             self.shoot()
 
         if self.current_weapon.weapon_type == 'melee':
-            self.swing()
+            self.swing(delta_time)
 
         # update the current weapons position to match the player
         self.update_weapon()
@@ -348,7 +348,7 @@ class Player(pygame.sprite.Sprite):
             self.attack_cooldown = pygame.time.get_ticks()
 
     # if you are attacking with a melee weapon then swing__________________________________________
-    def swing(self):
+    def swing(self, delta_time):
         if self.swinging and self.can_attack:
             swing_animation_frames = [pygame.image.load('textures/32X32/HUD/slash_first.png').convert_alpha(),
                                       pygame.image.load('textures/32X32/HUD/slash_second.png').convert_alpha()]
@@ -376,7 +376,7 @@ class Player(pygame.sprite.Sprite):
                 self.weapon_animation.image = pygame.transform.rotate(self.weapon_animation.image, 90)
                 self.weapon_animation.rect.topleft = (self.rect.topleft[0] - 16, self.rect.topleft[1] - 32)
 
-            self.swing_image_index += 0.35
+            self.swing_image_index += 30 * delta_time
             if self.swing_image_index >= len(swing_animation_frames):
                 self.swing_image_index = 0
                 self.swinging = False

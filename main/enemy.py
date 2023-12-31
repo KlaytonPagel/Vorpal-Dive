@@ -131,3 +131,4 @@ class Enemy(pygame.sprite.Sprite):
                         if self.enemy_direction.y != 0:
                             self.rect.y += self.enemy_direction.y * tile_size/2
                             self.check_obstacle_collisions('vertical')
+                        self.position_x, self.position_y = self.rect.center
