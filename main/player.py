@@ -480,7 +480,7 @@ class Player(pygame.sprite.Sprite):
 
             if self.invincible:
                 self.invincibility_cooldown += 1
-                if current_time - self.invincibility_cooldown >= 500:
+                if self.invincibility_cooldown - current_time >= 50:
                     self.invincible = False
 
             else:

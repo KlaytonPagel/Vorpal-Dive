@@ -72,9 +72,11 @@ class Enemy(pygame.sprite.Sprite):
                 pass
 
             # update the floating point variables
-            self.rect.x += self.enemy_direction.x * enemy_speed * delta_time
+            self.position_x += self.enemy_direction.x * enemy_speed * delta_time
+            self.rect.centerx = round(self.position_x)
             self.check_obstacle_collisions('horizontal')
-            self.rect.y += self.enemy_direction.y * enemy_speed * delta_time
+            self.position_y += self.enemy_direction.y * enemy_speed * delta_time
+            self.rect.centery = round(self.position_y)
             self.check_obstacle_collisions('vertical')
             self.rect.center = (self.position_x, self.position_y)
 
@@ -96,14 +98,17 @@ class Enemy(pygame.sprite.Sprite):
                 if direction == 'horizontal':
                     if self.rect.colliderect(sprite) and self.enemy_direction.x > 0:
                         self.rect.right = sprite.rect.left
+                        self.position_x, self.position_y = self.rect.center
                     elif self.rect.colliderect(sprite) and self.enemy_direction.x < 0:
                         self.rect.left = sprite.rect.right
+                        self.position_x, self.position_y = self.rect.center
                 if direction == 'vertical':
                     if self.rect.colliderect(sprite) and self.enemy_direction.y < 0:
                         self.rect.top = sprite.rect.bottom
+                        self.position_x, self.position_y = self.rect.center
                     elif self.rect.colliderect(sprite) and self.enemy_direction.y > 0:
                         self.rect.bottom = sprite.rect.top
-            self.position_x, self.position_y = self.rect.center
+                        self.position_x, self.position_y = self.rect.center
 
     # check for collision between enemy and a projectile___________________________________________
     def check_weapon_collision(self):
