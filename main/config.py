@@ -1,10 +1,10 @@
 # general settings_________________________________________________________________________________
 screen_width, screen_height = 1400, 800
-collision = True
+collision = False
 
 # Dungeon setting__________________________________________________________________________________
-tile_size = 32
-dungeon_width, dungeon_height = 2500, 2500
+tile_size = 64
+dungeon_width, dungeon_height = 5000, 5000
 min_room_width, max_room_width = 5, 15
 min_room_height, max_room_height = 5, 15
 room_attempts = 25
