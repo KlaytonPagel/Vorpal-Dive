@@ -122,114 +122,156 @@ class Dungeon:
         wall_top_long_right_image = pygame.image.load('textures/32X32/Walls/wall_top_long_right.png').convert_alpha()
         wall_bottom_long_left_image = pygame.image.load('textures/32X32/Walls/wall_bottom_long_left.png').convert_alpha()
         wall_bottom_long_right_image = pygame.image.load('textures/32X32/Walls/wall_bottom_long_right.png').convert_alpha()
-        wall_sides_image = pygame.image.load('textures/32X32/Walls/wall_sides.png').convert_alpha()
+        wall_top_connect_image = pygame.image.load('textures/32X32/Walls/wall_top_connect.png').convert_alpha()
+        wall_bottom_connect_image = pygame.image.load('textures/32X32/Walls/wall_bottom_connect.png').convert_alpha()
 
-        side = 'top left'
         for tile in self.floor_tile_positions:
 
-            # Check tile to the right
-            if (tile[0] + tile_size, tile[1]) not in self.floor_tile_positions:
-                self.wall_tile_positions[(tile[0] + tile_size, tile[1])] = wall_front_image
+            # top right corner
+            if ((tile[0] + tile_size, tile[1]) not in self.floor_tile_positions
+                    and (tile[0], tile[1] - tile_size) not in self.floor_tile_positions
+                    and (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
+                position = (tile[0] + tile_size, tile[1] - tile_size)
+                side = 'default'
+                self.wall_tile_positions[position] = [wall_top_right_image, side]
 
-            # check tile to the left
-            if (tile[0] - tile_size, tile[1]) not in self.floor_tile_positions:
-                self.wall_tile_positions[(tile[0] - tile_size, tile[1])] = wall_front_image
+            # top left corner
+            if ((tile[0] - tile_size, tile[1]) not in self.floor_tile_positions
+                  and (tile[0], tile[1] - tile_size) not in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
+                position = (tile[0], tile[1])
+                side = 'top left'
+                self.wall_tile_positions[position] = [wall_top_left_image, side]
 
-            # check tile above
-            if (tile[0], tile[1] + tile_size) not in self.floor_tile_positions:
-                self.wall_tile_positions[(tile[0], tile[1] + tile_size)] = wall_front_image
+            # bottom right corner
+            if ((tile[0] + tile_size, tile[1]) not in self.floor_tile_positions
+                  and (tile[0], tile[1] + tile_size) not in self.floor_tile_positions
+                  and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                position = (tile[0] + tile_size, tile[1] + tile_size)
+                side = 'bottom right'
+                self.wall_tile_positions[position] = [wall_bottom_right_image, side]
 
-            # check tile below
-            if (tile[0], tile[1] - tile_size) not in self.floor_tile_positions:
-                self.wall_tile_positions[(tile[0], tile[1] - tile_size)] = wall_front_image
+            # bottom left corner
+            if ((tile[0] - tile_size, tile[1]) not in self.floor_tile_positions
+                  and (tile[0], tile[1] + tile_size) not in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                position = (tile[0], tile[1] + tile_size)
+                side = 'bottom left'
+                self.wall_tile_positions[position] = [wall_bottom_left_image, side]
 
-            # check top right tile
-            if (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions:
-                self.wall_tile_positions[(tile[0] + tile_size, tile[1] + tile_size)] = wall_front_image
+                if (tile[0] + tile_size, tile[1] + tile_size) in self.floor_tile_positions:
+                    position = (tile[0] + tile_size // 2, tile[1] + tile_size)
+                    side = 'bottom'
+                    self.wall_tile_positions[position] = [wall_top_long_right_image, side]
 
-            # check top left tile
-            if (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions:
-                self.wall_tile_positions[(tile[0] - tile_size, tile[1] + tile_size)] = wall_front_image
+            # top connect
+            if ((tile[0] + tile_size, tile[1] + tile_size) in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1] + tile_size) in self.floor_tile_positions
+                  and (tile[0], tile[1] + tile_size) not in self.floor_tile_positions):
+                position = (tile[0], tile[1] + tile_size)
+                side = 'default'
+                self.wall_tile_positions[position] = [wall_top_connect_image, side]
 
-            # check bottom right tile
-            if (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions:
-                self.wall_tile_positions[(tile[0] + tile_size, tile[1] - tile_size)] = wall_front_image
+            # bottom connect
+            if ((tile[0] + tile_size, tile[1] - tile_size) in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1] - tile_size) in self.floor_tile_positions
+                  and (tile[0], tile[1] - tile_size) not in self.floor_tile_positions):
+                position = (tile[0], tile[1] - tile_size)
+                side = 'default'
+                self.wall_tile_positions[position] = [wall_bottom_connect_image, side]
 
-            # check bottom left tile
-            if (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions:
-                self.wall_tile_positions[(tile[0] - tile_size, tile[1] - tile_size)] = wall_front_image
+            # bottom left inside corner
+            if ((tile[0], tile[1] - tile_size) in self.floor_tile_positions
+                  and (tile[0] + tile_size, tile[1]) in self.floor_tile_positions
+                  and (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
+                position = (tile[0] + tile_size, tile[1] - tile_size)
+                side = 'default'
+                if position in self.wall_tile_positions:
+                    pass
+                else:
+                    self.wall_tile_positions[position] = [wall_bottom_long_left_image, side]
+
+            # bottom right inside corner
+            if ((tile[0], tile[1] - tile_size) in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1]) in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
+                position = (tile[0] - tile_size, tile[1] - tile_size)
+                side = 'default'
+                if position in self.wall_tile_positions:
+                    pass
+                else:
+                    self.wall_tile_positions[position] = [wall_bottom_long_right_image, side]
+
+            # top left inside corner
+            if ((tile[0], tile[1] + tile_size) in self.floor_tile_positions
+                  and (tile[0] + tile_size, tile[1]) in self.floor_tile_positions
+                  and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                position = (tile[0] + tile_size, tile[1] + tile_size)
+                side = 'default'
+                if position in self.wall_tile_positions:
+                    pass
+                else:
+                    self.wall_tile_positions[position] = [wall_top_long_left_image, side]
+
+            # top right inside corner
+            if ((tile[0], tile[1] + tile_size) in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1]) in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                position = (tile[0] - tile_size, tile[1] + tile_size)
+                side = 'default'
+                if position in self.wall_tile_positions:
+                    pass
+                else:
+                    self.wall_tile_positions[position] = [wall_top_long_right_image, side]
+
+            # bottom
+            if ((tile[0], tile[1] + tile_size) not in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions
+                  and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                position = (tile[0] + tile_size // 2, tile[1] + tile_size)
+                side = 'bottom'
+                if position in self.wall_tile_positions:
+                    pass
+                else:
+                    self.wall_tile_positions[position] = [wall_front_image, side]
+
+            # top
+            if ((tile[0], tile[1] - tile_size) not in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions
+                  and (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
+                position = (tile[0] + tile_size // 2, tile[1])
+                side = 'top'
+                if position in self.wall_tile_positions:
+                    pass
+                else:
+                    self.wall_tile_positions[position] = [wall_front_image, side]
+
+            # left
+            if ((tile[0] - tile_size, tile[1]) not in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions
+                  and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                position = (tile[0], tile[1] + tile_size // 2)
+                side = 'left'
+                if position in self.wall_tile_positions:
+                    pass
+                else:
+                    self.wall_tile_positions[position] = [wall_left_image, side]
+
+            # right
+            if ((tile[0] + tile_size, tile[1]) not in self.floor_tile_positions
+                  and (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions
+                  and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                position = (tile[0] + tile_size, tile[1] + tile_size // 2)
+                side = 'right'
+                if position in self.wall_tile_positions:
+                    pass
+                else:
+                    self.wall_tile_positions[position] = [wall_right_image, side]
 
         # Check the walls situation and apply the correct image
-        for position, image in self.wall_tile_positions.items():
-
-            # Front wall
-            if (position[0] + tile_size, position[1]) in self.wall_tile_positions and (position[0] - tile_size, position[1]) in self.wall_tile_positions:
-                image = wall_front_image
-
-            elif (position[0], position[1] + tile_size) in self.floor_tile_positions and (position[0], position[1] - tile_size) in self.floor_tile_positions:
-                image = wall_front_image
-
-            # right wall
-            elif (position[0] + tile_size, position[1]) in self.wall_tile_positions and (position[0], position[1] + tile_size) in self.wall_tile_positions \
-                    and (position[0], position[1] - tile_size) in self.wall_tile_positions and (position[0] - tile_size, position[1]) in self.floor_tile_positions:
-                image = wall_right_image
-
-            # left wall
-            elif ((position[0] - tile_size, position[1]) in self.wall_tile_positions and (position[0], position[1] + tile_size) in self.wall_tile_positions
-                  and (position[0], position[1] - tile_size) in self.wall_tile_positions and (position[0] + tile_size, position[1]) in self.floor_tile_positions):
-                image = wall_left_image
-
-            # Top left inside wall
-            elif (position[0] + tile_size, position[1]) in self.wall_tile_positions and (position[0], position[1] + tile_size) in self.wall_tile_positions \
-                    and (position[0] - tile_size, position[1]) in self.floor_tile_positions and (position[0], position[1] - tile_size) in self.floor_tile_positions:
-                image = wall_top_long_left_image
-
-            # Top left wall
-            elif (position[0] + tile_size, position[1]) in self.wall_tile_positions and (position[0], position[1] + tile_size) in self.wall_tile_positions:
-                image = wall_top_left_image
-
-            # Top right inside wall
-            elif (position[0] - tile_size, position[1]) in self.wall_tile_positions and (position[0], position[1] + tile_size) in self.wall_tile_positions \
-                    and (position[0] + tile_size, position[1]) in self.floor_tile_positions and (position[0], position[1] - tile_size) in self.floor_tile_positions:
-                image = wall_top_long_right_image
-
-            # Top right wall
-            elif (position[0] - tile_size, position[1]) in self.wall_tile_positions and (position[0], position[1] + tile_size) in self.wall_tile_positions:
-                image = wall_top_right_image
-
-            # Bottom right inside wall
-            elif (position[0] - tile_size, position[1]) in self.wall_tile_positions and (position[0], position[1] - tile_size) in self.wall_tile_positions \
-                    and (position[0] + tile_size, position[1]) in self.floor_tile_positions and (position[0], position[1] + tile_size) in self.floor_tile_positions:
-                image = wall_bottom_long_right_image
-
-            # Bottom right wall
-            elif (position[0] - tile_size, position[1]) in self.wall_tile_positions and (position[0], position[1] - tile_size) in self.wall_tile_positions:
-                image = wall_bottom_right_image
-
-            # Bottom left inside wall
-            elif ((position[0] + tile_size, position[1]) in self.wall_tile_positions and (position[0], position[1] - tile_size) in self.wall_tile_positions
-                  and (position[0] - tile_size, position[1]) in self.floor_tile_positions and (position[0], position[1] + tile_size) in self.floor_tile_positions):
-                image = wall_bottom_long_left_image
-
-            # Bottom left wall
-            elif (position[0] + tile_size, position[1]) in self.wall_tile_positions and (position[0], position[1] - tile_size) in self.wall_tile_positions:
-                image = wall_bottom_left_image
-
-            # sides wall
-            elif (position[0] + tile_size, position[1]) in self.floor_tile_positions and (position[0] - tile_size, position[1]) in self.floor_tile_positions:
-                image = wall_sides_image
-
-            # left wall
-            elif (position[0] + tile_size, position[1]) in self.floor_tile_positions:
-                image = wall_left_image
-
-            # right wall
-            elif (position[0] - tile_size, position[1]) in self.floor_tile_positions:
-                image = wall_right_image
-
-            wall = Tile(position, image, (self.visible_group, self.obstacle_group), side)
+        for position, data in self.wall_tile_positions.items():
+            wall = Tile(position, data[0], (self.visible_group, self.obstacle_group), data[1])
             self.wall_tile_sprites[position] = wall
-            side = 'top left'
 
         self.populate_grid_tiles()
 

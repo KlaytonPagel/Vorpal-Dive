@@ -1,6 +1,6 @@
 # general settings_________________________________________________________________________________
 screen_width, screen_height = 1400, 800
-collision = False
+collision = True
 
 # Dungeon setting__________________________________________________________________________________
 tile_size = 64

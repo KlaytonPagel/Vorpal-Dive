@@ -26,7 +26,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load("textures/Player.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
         self.rect = self.image.get_rect(topleft=position)
-        self.rect = self.rect.inflate(0, -10)
+        self.rect = self.rect.inflate(0, -20)
         self.player_x_position = self.rect.x
         self.player_y_position = self.rect.y
         self.position = position

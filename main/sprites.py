@@ -8,7 +8,24 @@ class Tile(pygame.sprite.Sprite):
         super().__init__(group)
         self.image = surf
         self.image = pygame.transform.scale(self.image, sprite_size)
-        self.rect = self.image.get_rect(topleft=pos)
+        if side == 'top right' or side == 'bottom left inside':
+            self.rect = self.image.get_rect(bottomleft=pos)
+        elif side == 'top left' or side == 'bottom right inside':
+            self.rect = self.image.get_rect(bottomright=pos)
+        elif side == 'bottom right' or side == 'top left inside':
+            self.rect = self.image.get_rect(topleft=pos)
+        elif side == 'bottom left' or side == 'top right inside':
+            self.rect = self.image.get_rect(topright=pos)
+        elif side == 'bottom':
+            self.rect = self.image.get_rect(midtop=pos)
+        elif side == 'top':
+            self.rect = self.image.get_rect(midbottom=pos)
+        elif side == 'right':
+            self.rect = self.image.get_rect(midleft=pos)
+        elif side == 'left':
+            self.rect = self.image.get_rect(midright=pos)
+        else:
+            self.rect = self.image.get_rect(topleft=pos)
         self.rect = self.rect.inflate(0, -10)
         self.name = name
 

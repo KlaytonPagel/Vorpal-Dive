@@ -1,3 +1,0 @@
-cd main/code
-
-pyinstaller -w --add-data 'config.py:.' --add-data 'dungeon_generator.py:.' --add-data 'enemy.py:.' --add-data 'enemy_spawner.py:.' --add-data 'HUD.py:.' --add-data 'inventory.py:.' --add-data 'player.py:.' --add-data 'projectiles.py:.' --add-data 'sprites.py:.' main.py 

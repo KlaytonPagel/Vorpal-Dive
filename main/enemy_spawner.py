@@ -17,11 +17,13 @@ class EnemySpawner:
         self.can_spawn = True
         self.spawn_cooldown = time.time()
 
+        self.spawn_count = 0
+
     # Spawn an enemy on a floor tile not close to the player_______________________________________
     def spawn_enemy(self, player_location):
         enemy_location = self.spawnable_tiles[random.randint(0, len(self.spawnable_tiles) - 1)]
-        if (abs(player_location[0] - enemy_location[0]) < 10 * tile_size and
-                abs(player_location[1] - enemy_location[1]) < 10 * tile_size):
+        if (abs(player_location[0] - enemy_location[0]) < 11 * tile_size and
+                abs(player_location[1] - enemy_location[1]) < 11 * tile_size):
             self.spawn_enemy(player_location)
         else:
             Enemy((self.visible_group, self.enemy_group), enemy_location, self.grid, self.obstacle_group, self.projectile_group)
@@ -40,5 +42,7 @@ class EnemySpawner:
             if random.randint(1, 100/spawn_chance_per_second) == 1:
                 for i in range(1):
                     self.spawn_enemy(player_location)
+                    self.spawn_count += 1
+                # print(self.spawn_count)
             self.can_spawn = False
             self.spawn_cooldown = time.time()
