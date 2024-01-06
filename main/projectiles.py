@@ -62,7 +62,7 @@ class Projectile(pygame.sprite.Sprite):
         self.rect.center = (self.position_x, self.position_y)
 
         # update to projectiles traveled distance
-        self.projectile_distance += self.projectile_speed
+        self.projectile_distance += self.projectile_speed * delta_time
 
         self.check_collisions()
         self.check_distance()
@@ -78,5 +78,5 @@ class Projectile(pygame.sprite.Sprite):
 
     # check if the distance the projectile has traveled exceeds the range__________________________
     def check_distance(self):
-        if self.projectile_distance > projectile_range * tile_size * self.projectile_speed:
+        if self.projectile_distance > (projectile_range * tile_size):
             self.kill()
