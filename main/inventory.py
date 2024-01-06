@@ -1,5 +1,6 @@
 import json
-
+import sys
+import platform
 import pygame
 from sprites import HUDobject
 
@@ -17,12 +18,25 @@ class Inventory:
         self.hud_group = hud_group
 
     def save_inventory(self):
-        with open('json/player_inventory.json', 'w') as player_inventory:
-            json.dump(self.inventory_slots, player_inventory)
+        if sys.platform == 'emscripten':
+            for slot, item in self.inventory_slots.items():
+                platform.window.localStorage.setItem(str(slot), str(item))
+        else:
+            with open('json/player_inventory.json', 'w') as player_inventory:
+                json.dump(self.inventory_slots, player_inventory)
 
     def load_inventory(self):
         with open('json/player_inventory.json') as player_inventory:
             self.inventory_slots = json.load(player_inventory)
+
+        if sys.platform == 'emscripten':
+            if platform.window.localStorage.getItem('equipped') == None:
+                self.save_inventory()
+            for slot, item in self.inventory_slots.items():
+                stored_item = platform.window.localStorage.getItem(str(slot)).split(',')[2].split("'")[1]
+                if stored_item != '0':
+                    self.inventory_slots[slot] = [item[0], stored_item]
+        print(self.inventory_slots)
 
     def get_item_ids(self):
         with open('json/item_IDs.json') as item_id_file:

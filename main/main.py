@@ -88,7 +88,7 @@ async def main():
                 player.inventory.save_inventory()
                 running = False
 
-        dt = time.time() - last_frame_time
+        dt = (time.time() - last_frame_time) * 60
         last_frame_time = time.time()
 
         screen.fill((0, 0, 0))

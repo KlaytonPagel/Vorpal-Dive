@@ -2,6 +2,8 @@ import pygame
 import json
 import os
 import time
+import sys
+import platform
 from config import *
 from projectiles import Projectile
 from sprites import Weapon, WeaponAnimation
@@ -78,21 +80,34 @@ class Player(pygame.sprite.Sprite):
 
     # Load all player stats and variables from JSON file___________________________________________
     def load_player_data(self):
-        if not os.path.isfile('json/player_data.json'):
-            self.save_player_data()
-        with open('json/player_data.json') as player_data_file:
-            self.player_data = json.load(player_data_file)
-            self.max_health = self.player_data['max_health']
-            self.current_health = self.player_data['current_health']
-            self.player_speed = self.player_data['player_speed']
-            self.player_damage = self.player_data['player_damage']
+        if sys.platform == 'emscripten':
+            if platform.window.localStorage.getItem('current_health') == None:
+                self.save_player_data()
+            self.player_data['max_health'] = self.max_health = int(platform.window.localStorage.getItem('max_health'))
+            self.player_data['current_health'] = self.current_health = int(platform.window.localStorage.getItem('current_health'))
+            self.player_data['player_speed'] = self.player_speed = int(platform.window.localStorage.getItem('player_speed'))
+            self.player_data['player_damage'] = self.player_damage = int(platform.window.localStorage.getItem('player_damage'))
+            print(self.current_health)
+        else:
+            if not os.path.isfile('json/player_data.json'):
+                self.save_player_data()
+            with open('json/player_data.json') as player_data_file:
+                self.player_data = json.load(player_data_file)
+                self.max_health = self.player_data['max_health']
+                self.current_health = self.player_data['current_health']
+                self.player_speed = self.player_data['player_speed']
+                self.player_damage = self.player_data['player_damage']
 
     # Save all player stats and variables from JSON file___________________________________________
     def save_player_data(self):
         player_data = {'max_health': self.max_health, 'current_health': self.current_health,
                        'player_speed': self.player_speed, 'player_damage': self.player_damage}
-        with open('json/player_data.json', 'w') as player_data_file:
-            json.dump(player_data, player_data_file)
+        if sys.platform == 'emscripten':
+            for stat, value in player_data.items():
+                platform.window.localStorage.setItem(stat, str(value))
+        else:
+            with open('json/player_data.json', 'w') as player_data_file:
+                json.dump(player_data, player_data_file)
 
     # track all user input for the player__________________________________________________________
     def player_input(self, event_list):
@@ -236,6 +251,8 @@ class Player(pygame.sprite.Sprite):
 
         # Move the player
         self.player_input(event_list)
+        self.save_player_data()
+        self.inventory.save_inventory()
         if self.player_direction.magnitude() != 0:
             self.player_direction = self.player_direction.normalize()
 
@@ -376,7 +393,7 @@ class Player(pygame.sprite.Sprite):
                 self.weapon_animation.image = pygame.transform.rotate(self.weapon_animation.image, 90)
                 self.weapon_animation.rect.topleft = (self.rect.topleft[0] - 16, self.rect.topleft[1] - 32)
 
-            self.swing_image_index += 30 * delta_time
+            self.swing_image_index += 0.3 * delta_time
             if self.swing_image_index >= len(swing_animation_frames):
                 self.swing_image_index = 0
                 self.swinging = False
