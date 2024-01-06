@@ -4,20 +4,23 @@ from config import *
 
 # class for all game projectiles___________________________________________________________________
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, group, position, starting_point, end_point, obstacle_group, damage, player_speed, player_direction):
+    def __init__(self, group, position, starting_point, end_point,
+                 obstacle_group, damage, player_speed, player_direction):
         super().__init__(group)
 
         # Projectile sprite setup
         self.image = pygame.image.load('textures/32X32/bullet.png').convert_alpha()
         self.image = pygame.transform.scale(self.image, (tile_size // 4, tile_size // 4))
         self.rect = self.image.get_rect(center=position)
-        self.projectile_direction = pygame.math.Vector2()
         self.weapon_type = 'projectile'
 
         # points to find the direction to shoot in
         self.starting_point = pygame.math.Vector2(starting_point)
         self.end_point = pygame.math.Vector2(end_point)
         self.projectile_speed = projectile_speed
+
+        # normalize the direction vector so the length of the line doesn't affect projectile speed
+        self.projectile_direction = (self.end_point - self.starting_point).normalize()
 
         # use separate points to determine the projectile position, this allows use of floating numbers for precision
         self.position_x, self.position_y = position
@@ -34,18 +37,28 @@ class Projectile(pygame.sprite.Sprite):
         # players speed and direction to add to the projectile
         self.player_speed = player_speed
         self.player_direction = player_direction
+        self.player_adjustment_x = self.player_direction.x * self.player_speed * .3
+        self.player_adjustment_y = self.player_direction.y * self.player_speed * .3
+        if self.player_adjustment_x == 0:
+            self.player_adjustment_x = 1
+        if self.player_adjustment_y == 0:
+            self.player_adjustment_y = 1
 
     # update the projectiles position______________________________________________________________
     def update(self, delta_time):
-        # normalize the direction vector so the length of the line doesn't affect projectile speed
-        self.projectile_direction = (self.end_point - self.starting_point).normalize()
 
         # update the floating point variables
-        player_adjustment_x = self.player_direction.x * self.player_speed // 5
-        player_adjustment_y = self.player_direction.y * self.player_speed // 5
-        print(self.player_direction)
-        self.position_x += self.projectile_direction.x * self.projectile_speed * delta_time + player_adjustment_x
-        self.position_y += self.projectile_direction.y * self.projectile_speed * delta_time + player_adjustment_y
+        if ((self.player_adjustment_x > 1 and self.projectile_direction.x > 0) or
+                (self.player_adjustment_x < 0 and self.projectile_direction.x < 0)):
+            self.position_x += self.projectile_direction.x * self.projectile_speed * delta_time * abs(self.player_adjustment_x)
+        else:
+            self.position_x += self.projectile_direction.x * self.projectile_speed * delta_time
+
+        if ((self.player_adjustment_y > 1 and self.projectile_direction.y > 0) or
+                (self.player_adjustment_y < 0 and self.projectile_direction.y < 0)):
+            self.position_y += self.projectile_direction.y * self.projectile_speed * delta_time * abs(self.player_adjustment_y)
+        else:
+            self.position_y += self.projectile_direction.y * self.projectile_speed * delta_time
         self.rect.center = (self.position_x, self.position_y)
 
         # update to projectiles traveled distance
