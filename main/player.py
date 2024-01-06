@@ -68,6 +68,7 @@ class Player(pygame.sprite.Sprite):
         self.just_closed_option = False
         self.selected_item = None
         self.inventory = Inventory(self.hud_group)
+        self.auto_save_timer = pygame.time.get_ticks()
 
         self.player_data = {}
         self.load_player_data()
@@ -251,8 +252,6 @@ class Player(pygame.sprite.Sprite):
 
         # Move the player
         self.player_input(event_list)
-        self.save_player_data()
-        self.inventory.save_inventory()
         if self.player_direction.magnitude() != 0:
             self.player_direction = self.player_direction.normalize()
 
@@ -359,7 +358,8 @@ class Player(pygame.sprite.Sprite):
             starting_point = pygame.math.Vector2(screen.get_width() // 2, screen.get_height() // 2)
 
             Projectile((self.visible_group, self.weapon_group), self.rect.center,
-                       starting_point, end_point, self.obstacle_group, self.player_damage)
+                       starting_point, end_point, self.obstacle_group, self.player_damage,
+                       self.player_speed, self.player_direction)
 
             self.can_attack = False
             self.attack_cooldown = pygame.time.get_ticks()
@@ -415,11 +415,15 @@ class Player(pygame.sprite.Sprite):
     # all player cool downs________________________________________________________________________
     def cool_downs(self):
         current_time = pygame.time.get_ticks()
-
         # Shooting cooldown
         if not self.can_attack:
             if current_time - self.attack_cooldown > 1000 // self.attack_speed:
                 self.can_attack = True
+
+        if current_time - self.auto_save_timer > 5000:
+            self.save_player_data()
+            self.inventory.save_inventory()
+            self.auto_save_timer = pygame.time.get_ticks()
 
     # adjust the players maximum health____________________________________________________________
     def adjust_max_health(self, amount):

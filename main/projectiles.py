@@ -4,7 +4,7 @@ from config import *
 
 # class for all game projectiles___________________________________________________________________
 class Projectile(pygame.sprite.Sprite):
-    def __init__(self, group, position, starting_point, end_point, obstacle_group, damage):
+    def __init__(self, group, position, starting_point, end_point, obstacle_group, damage, player_speed, player_direction):
         super().__init__(group)
 
         # Projectile sprite setup
@@ -17,6 +17,7 @@ class Projectile(pygame.sprite.Sprite):
         # points to find the direction to shoot in
         self.starting_point = pygame.math.Vector2(starting_point)
         self.end_point = pygame.math.Vector2(end_point)
+        self.projectile_speed = projectile_speed
 
         # use separate points to determine the projectile position, this allows use of floating numbers for precision
         self.position_x, self.position_y = position
@@ -30,18 +31,25 @@ class Projectile(pygame.sprite.Sprite):
         # projectiles damage
         self.damage = damage
 
+        # players speed and direction to add to the projectile
+        self.player_speed = player_speed
+        self.player_direction = player_direction
+
     # update the projectiles position______________________________________________________________
     def update(self, delta_time):
         # normalize the direction vector so the length of the line doesn't affect projectile speed
         self.projectile_direction = (self.end_point - self.starting_point).normalize()
 
         # update the floating point variables
-        self.position_x += self.projectile_direction.x * projectile_speed * delta_time
-        self.position_y += self.projectile_direction.y * projectile_speed * delta_time
+        player_adjustment_x = self.player_direction.x * self.player_speed // 5
+        player_adjustment_y = self.player_direction.y * self.player_speed // 5
+        print(self.player_direction)
+        self.position_x += self.projectile_direction.x * self.projectile_speed * delta_time + player_adjustment_x
+        self.position_y += self.projectile_direction.y * self.projectile_speed * delta_time + player_adjustment_y
         self.rect.center = (self.position_x, self.position_y)
 
         # update to projectiles traveled distance
-        self.projectile_distance += projectile_speed
+        self.projectile_distance += self.projectile_speed
 
         self.check_collisions()
         self.check_distance()
@@ -57,5 +65,5 @@ class Projectile(pygame.sprite.Sprite):
 
     # check if the distance the projectile has traveled exceeds the range__________________________
     def check_distance(self):
-        if self.projectile_distance > projectile_range * tile_size * projectile_speed:
+        if self.projectile_distance > projectile_range * tile_size * self.projectile_speed:
             self.kill()

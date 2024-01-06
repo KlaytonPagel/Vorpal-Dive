@@ -101,11 +101,18 @@ class Dungeon:
     def build_floors(self):
         # Create a new surface for all floor tiles
         complete_floor_surface = pygame.Surface((dungeon_width, dungeon_height))
+        floor_images = ['textures/32X32/Floors/floor.png',
+                        'textures/32X32/Floors/floor_bottom_right.png',
+                        'textures/32X32/Floors/floor_bottom_left.png',
+                        'textures/32X32/Floors/floor_top_left.png',
+                        'textures/32X32/Floors/floor_top_right.png',
+                        'textures/32X32/Floors/floor_horizontal.png',
+                        'textures/32X32/Floors/floor_vertical.png']
 
-        # load all floor tile images and combine all tiles onto one surface
-        floor_tile_image = pygame.image.load('textures/32X32/Floors/Floor 3.png').convert()
-        floor_tile_image = pygame.transform.scale(floor_tile_image, (tile_size, tile_size))
         for tile in self.floor_tile_positions:
+            # load all floor tile images and combine all tiles onto one surface
+            floor_tile_image = pygame.image.load(floor_images[random.randint(0, len(floor_images) - 1)]).convert()
+            floor_tile_image = pygame.transform.scale(floor_tile_image, (tile_size, tile_size))
             complete_floor_surface.blit(floor_tile_image, (tile[0], tile[1]))
         self.dungeon_level.append(complete_floor_surface)
 
