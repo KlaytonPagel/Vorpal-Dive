@@ -31,6 +31,7 @@ class VisibleGroup(pygame.sprite.Group):
 
     # Draw all sprites on the screen
     def custom_draw(self):
+        screen = pygame.display.get_surface()
         global dungeon
         self.center_camera(player)
 
@@ -40,8 +41,10 @@ class VisibleGroup(pygame.sprite.Group):
 
         # Display items in relation to players character
         for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
-            offset_pos = sprite.rect.topleft - self.offset
-            screen.blit(sprite.image, offset_pos)
+            if (abs(sprite.rect.topleft[0] - player.rect.topleft[0]) <= (screen.get_width() // 2) + tile_size and
+                    abs(sprite.rect.topleft[1] - player.rect.topleft[1]) <= (screen.get_height() // 2) + tile_size):
+                offset_pos = sprite.rect.topleft - self.offset
+                screen.blit(sprite.image, offset_pos)
 
 
 class HUDGroup(pygame.sprite.Group):
@@ -104,5 +107,6 @@ async def main():
         pygame.display.flip()
         clock.tick()
         await asyncio.sleep(0)
+
 
 asyncio.run(main())
