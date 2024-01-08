@@ -34,8 +34,7 @@ class Inventory:
                 self.save_inventory()
             for slot, item in self.inventory_slots.items():
                 stored_item = platform.window.localStorage.getItem(str(slot)).split(',')[2].split("'")[1]
-                if stored_item != '0':
-                    self.inventory_slots[slot] = [item[0], stored_item]
+                self.inventory_slots[slot] = [item[0], stored_item]
 
     def get_item_ids(self):
         with open('json/item_IDs.json') as item_id_file:
