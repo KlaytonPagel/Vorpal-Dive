@@ -8,12 +8,15 @@ from player import Player
 from enemy_spawner import EnemySpawner
 from sprites import Text
 from tile_system import Grid
+from main_menu import MenuScreens
 
 # start pygame_____________________________________________________________________________________
 pygame.init()
 screen = pygame.display.set_mode((screen_width, screen_height), RESIZABLE)
 pygame.display.set_caption('Vorpal Dive')
 running = True
+in_game = False
+in_main_menu = True
 clock = pygame.time.Clock()
 
 
@@ -67,42 +70,58 @@ obstacle_group = pygame.sprite.Group()
 weapon_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 
-# create objects___________________________________________________________________________________
-grid = Grid()
-dungeon = Dungeon(visible_group, obstacle_group, grid)
-player = Player(visible_group, dungeon.player_start_position, grid, visible_group,
-                obstacle_group, weapon_group, enemy_group, hud_group)
-enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, grid, visible_group,
-                             enemy_group, obstacle_group, weapon_group)
 
-debug = Text((screen_width - 75, screen_height - 75), str(round(clock.get_fps())), hud_group, 50, (255, 255, 255))
+# initiate the game________________________________________________________________________________
+def start_game():
+    global grid, dungeon, player, enemy_spawner, debug
+    grid = Grid()
+    dungeon = Dungeon(visible_group, obstacle_group, grid)
+    player = Player(visible_group, dungeon.player_start_position, grid, visible_group,
+                    obstacle_group, weapon_group, enemy_group, hud_group)
+    enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, grid, visible_group,
+                                 enemy_group, obstacle_group, weapon_group)
+
+    debug = Text((screen_width - 75, screen_height - 75), str(round(clock.get_fps())), hud_group, 50, (255, 255, 255))
+
+
+# open up the main menu
+def main_menu():
+    return MenuScreens()
+
 
 last_frame_time = time.time()
 
 
 async def main():
-    global running, last_frame_time
+    global running, last_frame_time, in_main_menu, in_game
+    menu = main_menu()
 
     while running:
         event_list = pygame.event.get()
         for event in event_list:
             if event.type == pygame.QUIT:
-                player.save_player_data()
-                player.inventory.save_inventory()
                 running = False
 
         dt = (time.time() - last_frame_time) * 60
         last_frame_time = time.time()
 
-        screen.fill((0, 0, 0))
-        visible_group.custom_draw()
-        player.update(event_list, dt)
+        if in_game:
+            screen.fill((0, 0, 0))
+            visible_group.custom_draw()
+            player.update(event_list, dt)
 
-        enemy_spawner.decide_spawn_enemy(player.rect.center)
-        enemy_group.update(player.rect.center, dt)
-        debug.image = pygame.font.Font(None, 50).render((str(round(clock.get_fps()))), True, (255, 255, 255))
+            enemy_spawner.decide_spawn_enemy(player.rect.center)
+            enemy_group.update(player.rect.center, dt)
+            debug.image = pygame.font.Font(None, 50).render((str(round(clock.get_fps()))), True, (255, 255, 255))
 
-        hud_group.custom_draw(screen)
+            hud_group.custom_draw(screen)
+
+        if in_main_menu:
+            selection = menu.draw(event_list)
+            if selection == 'start_game':
+                in_game = True
+                in_main_menu = False
+                start_game()
 
         pygame.display.flip()
         clock.tick()

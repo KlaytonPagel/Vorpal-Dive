@@ -41,7 +41,7 @@ class Player(pygame.sprite.Sprite):
 
         # default health values
         self.max_health = 100
-        self.current_health = 100
+        self.current_health = self.max_health
         self.invincibility_cooldown = time.time()
         self.invincible = False
 
@@ -82,27 +82,25 @@ class Player(pygame.sprite.Sprite):
     # Load all player stats and variables from JSON file___________________________________________
     def load_player_data(self):
         if sys.platform == 'emscripten':
-            if platform.window.localStorage.getItem('current_health') == None:
+            if platform.window.localStorage.getItem('max_health') == None:
                 self.save_player_data()
             self.player_data['max_health'] = self.max_health = int(platform.window.localStorage.getItem('max_health'))
-            self.player_data['current_health'] = self.current_health = int(platform.window.localStorage.getItem('current_health'))
             self.player_data['player_speed'] = self.player_speed = int(platform.window.localStorage.getItem('player_speed'))
             self.player_data['player_damage'] = self.player_damage = int(platform.window.localStorage.getItem('player_damage'))
-            print(self.current_health)
+            self.player_data['current_health'] = self.max_health
         else:
             if not os.path.isfile('json/player_data.json'):
                 self.save_player_data()
             with open('json/player_data.json') as player_data_file:
                 self.player_data = json.load(player_data_file)
                 self.max_health = self.player_data['max_health']
-                self.current_health = self.player_data['current_health']
                 self.player_speed = self.player_data['player_speed']
                 self.player_damage = self.player_data['player_damage']
+                self.player_data['current_health'] = self.max_health
 
     # Save all player stats and variables from JSON file___________________________________________
     def save_player_data(self):
-        player_data = {'max_health': self.max_health, 'current_health': self.current_health,
-                       'player_speed': self.player_speed, 'player_damage': self.player_damage}
+        player_data = {'max_health': self.max_health, 'player_speed': self.player_speed, 'player_damage': self.player_damage}
         if sys.platform == 'emscripten':
             for stat, value in player_data.items():
                 platform.window.localStorage.setItem(stat, str(value))
