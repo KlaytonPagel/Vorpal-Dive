@@ -527,4 +527,5 @@ class Player(pygame.sprite.Sprite):
 
             for item in self.item_group:
                 if self.rect.colliderect(item):
-                    print('found it')
+                    self.inventory.add_item(item.item_id)
+                    item.kill()

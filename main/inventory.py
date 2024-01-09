@@ -84,3 +84,9 @@ class Inventory:
             self.inventory_slots['secondary'][1] = item.name
 
         self.update_inventory()
+
+    def add_item(self, item_id):
+        for slot in self.inventory_slots:
+            if self.inventory_slots[slot][1] == '0':
+                self.inventory_slots[slot][1] = item_id
+                return

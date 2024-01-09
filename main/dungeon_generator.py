@@ -302,4 +302,4 @@ class Dungeon:
             self.spawn_artifact()
 
         else:
-            artifact = Item((self.visible_group, self.item_group), artifact_image, self.room_centers[room_index])
+            artifact = Item((self.visible_group, self.item_group), artifact_image, self.room_centers[room_index], '4')
