@@ -14,7 +14,8 @@ from settings_screen import Settings
 
 # A class to create and manage the player character________________________________________________
 class Player(pygame.sprite.Sprite):
-    def __init__(self, group, position, grid, visible_group, obstacle_group, weapon_group, enemy_group, hud_group):
+    def __init__(self, group, position, grid, visible_group, obstacle_group,
+                 weapon_group, enemy_group, hud_group, item_group):
         super().__init__(group)
 
         # Define sprite groups
@@ -23,6 +24,7 @@ class Player(pygame.sprite.Sprite):
         self.weapon_group = weapon_group
         self.enemy_group = enemy_group
         self.hud_group = hud_group
+        self.item_group = item_group
 
         # Player sprite setup
         self.image = pygame.image.load("textures/Player.png").convert_alpha()
@@ -264,6 +266,7 @@ class Player(pygame.sprite.Sprite):
         self.get_current_tile()
 
         self.check_enemy_collision()
+        self.check_item_collision()
         self.cool_downs()
 
         # update all projectile and weapon animations
@@ -518,3 +521,10 @@ class Player(pygame.sprite.Sprite):
                             self.player_direction.y = 0
                         self.invincible = True
                         self.invincibility_cooldown = time.time()
+
+    def check_item_collision(self):
+        if collision:
+
+            for item in self.item_group:
+                if self.rect.colliderect(item):
+                    print('found it')

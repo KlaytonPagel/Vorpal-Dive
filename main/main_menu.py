@@ -11,6 +11,7 @@ class MenuScreens:
 
         self.play_button_pressed = pygame.image.load('textures/32X32/play_button_pressed.png').convert()
         self.play_button_image = pygame.image.load('textures/32X32/play_button.png').convert()
+        self.play_button_down = pygame.image.load('textures/32X32/play_button_down.png').convert_alpha()
         self.play_button_status = 'unpressed'
 
         self.create_main_menu()
@@ -39,6 +40,7 @@ class MenuScreens:
                 x, y = event.pos
 
                 if self.menu_items['play_button'].rect.collidepoint(x, y):
+                    self.menu_items['play_button'].image = self.play_button_down
                     return 'start_game'
 
     def update_main_menu(self):
@@ -54,8 +56,8 @@ class MenuScreens:
 
     def draw(self, event_list):
         selection = self.user_input(event_list)
-        if selection == 'start_game':
-            return selection
+        self.update_main_menu()
         self.screen.fill((100, 100, 100))
         self.menu_group.draw(self.screen)
-        self.update_main_menu()
+        if selection == 'start_game':
+            return selection

@@ -2,22 +2,26 @@ import random_number as random
 import pygame
 from sprites import Tile
 from config import *
+from item_system import Item
 
 
 # Dungeon class for generating a random dungeon____________________________________________________
 class Dungeon:
-    def __init__(self, visible_group, obstacle_group, grid):
+    def __init__(self, visible_group, obstacle_group, item_group, grid):
         self.floor_tile_positions = []
         self.wall_tile_positions = {}
         self.wall_tile_sprites = {}
         self.grid = grid
         self.visible_group = visible_group
         self.obstacle_group = obstacle_group
+        self.item_group = item_group
         self.player_start_position = None
         self.dungeon_level = []
+        self.room_centers = []
         self.generate_rooms()
         self.build_floors()
         self.build_walls()
+        self.spawn_artifact()
 
     # Choose random places within dungeon size and build rooms_____________________________________
     def generate_rooms(self):
@@ -40,6 +44,8 @@ class Dungeon:
 
             # Check if a room will overlap
             if self.validate_room(room_x, room_y, room_width, room_height):
+                # add room center to list for spawning items
+                self.room_centers.append((room_x + room_width // 2 * tile_size, room_y + room_height // 2 * tile_size))
 
                 # Build out the room from the starting position
                 for h in range(room_height):
@@ -126,8 +132,10 @@ class Dungeon:
         wall_bottom_right_image = pygame.image.load('textures/32X32/Walls/wall_bottom_right.png').convert_alpha()
         wall_top_long_left_image = pygame.image.load('textures/32X32/Walls/wall_top_long_left.png').convert_alpha()
         wall_top_long_right_image = pygame.image.load('textures/32X32/Walls/wall_top_long_right.png').convert_alpha()
-        wall_bottom_long_left_image = pygame.image.load('textures/32X32/Walls/wall_bottom_long_left.png').convert_alpha()
-        wall_bottom_long_right_image = pygame.image.load('textures/32X32/Walls/wall_bottom_long_right.png').convert_alpha()
+        wall_bottom_long_left_image = pygame.image.load(
+            'textures/32X32/Walls/wall_bottom_long_left.png').convert_alpha()
+        wall_bottom_long_right_image = pygame.image.load(
+            'textures/32X32/Walls/wall_bottom_long_right.png').convert_alpha()
         wall_top_connect_image = pygame.image.load('textures/32X32/Walls/wall_top_connect.png').convert_alpha()
         wall_bottom_connect_image = pygame.image.load('textures/32X32/Walls/wall_bottom_connect.png').convert_alpha()
 
@@ -143,24 +151,24 @@ class Dungeon:
 
             # top left corner
             if ((tile[0] - tile_size, tile[1]) not in self.floor_tile_positions
-                  and (tile[0], tile[1] - tile_size) not in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
+                    and (tile[0], tile[1] - tile_size) not in self.floor_tile_positions
+                    and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
                 position = (tile[0], tile[1])
                 side = 'top left'
                 self.wall_tile_positions[position] = [wall_top_left_image, side]
 
             # bottom right corner
             if ((tile[0] + tile_size, tile[1]) not in self.floor_tile_positions
-                  and (tile[0], tile[1] + tile_size) not in self.floor_tile_positions
-                  and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                    and (tile[0], tile[1] + tile_size) not in self.floor_tile_positions
+                    and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
                 position = (tile[0] + tile_size, tile[1] + tile_size)
                 side = 'bottom right'
                 self.wall_tile_positions[position] = [wall_bottom_right_image, side]
 
             # bottom left corner
             if ((tile[0] - tile_size, tile[1]) not in self.floor_tile_positions
-                  and (tile[0], tile[1] + tile_size) not in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                    and (tile[0], tile[1] + tile_size) not in self.floor_tile_positions
+                    and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
                 position = (tile[0], tile[1] + tile_size)
                 side = 'bottom left'
                 self.wall_tile_positions[position] = [wall_bottom_left_image, side]
@@ -172,24 +180,24 @@ class Dungeon:
 
             # top connect
             if ((tile[0] + tile_size, tile[1] + tile_size) in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1] + tile_size) in self.floor_tile_positions
-                  and (tile[0], tile[1] + tile_size) not in self.floor_tile_positions):
+                    and (tile[0] - tile_size, tile[1] + tile_size) in self.floor_tile_positions
+                    and (tile[0], tile[1] + tile_size) not in self.floor_tile_positions):
                 position = (tile[0], tile[1] + tile_size)
                 side = 'default'
                 self.wall_tile_positions[position] = [wall_top_connect_image, side]
 
             # bottom connect
             if ((tile[0] + tile_size, tile[1] - tile_size) in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1] - tile_size) in self.floor_tile_positions
-                  and (tile[0], tile[1] - tile_size) not in self.floor_tile_positions):
+                    and (tile[0] - tile_size, tile[1] - tile_size) in self.floor_tile_positions
+                    and (tile[0], tile[1] - tile_size) not in self.floor_tile_positions):
                 position = (tile[0], tile[1] - tile_size)
                 side = 'default'
                 self.wall_tile_positions[position] = [wall_bottom_connect_image, side]
 
             # bottom left inside corner
             if ((tile[0], tile[1] - tile_size) in self.floor_tile_positions
-                  and (tile[0] + tile_size, tile[1]) in self.floor_tile_positions
-                  and (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
+                    and (tile[0] + tile_size, tile[1]) in self.floor_tile_positions
+                    and (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
                 position = (tile[0] + tile_size, tile[1] - tile_size)
                 side = 'default'
                 if position in self.wall_tile_positions:
@@ -199,8 +207,8 @@ class Dungeon:
 
             # bottom right inside corner
             if ((tile[0], tile[1] - tile_size) in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1]) in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
+                    and (tile[0] - tile_size, tile[1]) in self.floor_tile_positions
+                    and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
                 position = (tile[0] - tile_size, tile[1] - tile_size)
                 side = 'default'
                 if position in self.wall_tile_positions:
@@ -210,8 +218,8 @@ class Dungeon:
 
             # top left inside corner
             if ((tile[0], tile[1] + tile_size) in self.floor_tile_positions
-                  and (tile[0] + tile_size, tile[1]) in self.floor_tile_positions
-                  and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                    and (tile[0] + tile_size, tile[1]) in self.floor_tile_positions
+                    and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
                 position = (tile[0] + tile_size, tile[1] + tile_size)
                 side = 'default'
                 if position in self.wall_tile_positions:
@@ -221,8 +229,8 @@ class Dungeon:
 
             # top right inside corner
             if ((tile[0], tile[1] + tile_size) in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1]) in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                    and (tile[0] - tile_size, tile[1]) in self.floor_tile_positions
+                    and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
                 position = (tile[0] - tile_size, tile[1] + tile_size)
                 side = 'default'
                 if position in self.wall_tile_positions:
@@ -232,8 +240,8 @@ class Dungeon:
 
             # bottom
             if ((tile[0], tile[1] + tile_size) not in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions
-                  and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                    and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions
+                    and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
                 position = (tile[0] + tile_size // 2, tile[1] + tile_size)
                 side = 'bottom'
                 if position in self.wall_tile_positions:
@@ -243,8 +251,8 @@ class Dungeon:
 
             # top
             if ((tile[0], tile[1] - tile_size) not in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions
-                  and (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
+                    and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions
+                    and (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions):
                 position = (tile[0] + tile_size // 2, tile[1])
                 side = 'top'
                 if position in self.wall_tile_positions:
@@ -254,8 +262,8 @@ class Dungeon:
 
             # left
             if ((tile[0] - tile_size, tile[1]) not in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions
-                  and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                    and (tile[0] - tile_size, tile[1] - tile_size) not in self.floor_tile_positions
+                    and (tile[0] - tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
                 position = (tile[0], tile[1] + tile_size // 2)
                 side = 'left'
                 if position in self.wall_tile_positions:
@@ -265,8 +273,8 @@ class Dungeon:
 
             # right
             if ((tile[0] + tile_size, tile[1]) not in self.floor_tile_positions
-                  and (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions
-                  and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
+                    and (tile[0] + tile_size, tile[1] - tile_size) not in self.floor_tile_positions
+                    and (tile[0] + tile_size, tile[1] + tile_size) not in self.floor_tile_positions):
                 position = (tile[0] + tile_size, tile[1] + tile_size // 2)
                 side = 'right'
                 if position in self.wall_tile_positions:
@@ -284,3 +292,14 @@ class Dungeon:
     def populate_grid_tiles(self):
         for position, wall in self.wall_tile_sprites.items():
             self.grid.fill_grid(position, wall)
+
+    def spawn_artifact(self):
+        artifact_image = pygame.image.load('textures/32X32/green_drop.png').convert_alpha()
+
+        room_index = random.randint(0, len(self.room_centers) - 1)
+        if (abs(self.room_centers[room_index][0] - self.player_start_position[0]) < dungeon_width // 2 and
+                abs(self.room_centers[room_index][1] - self.player_start_position[1]) < dungeon_height // 2):
+            self.spawn_artifact()
+
+        else:
+            artifact = Item((self.visible_group, self.item_group), artifact_image, self.room_centers[room_index])

@@ -69,15 +69,16 @@ hud_group = HUDGroup()
 obstacle_group = pygame.sprite.Group()
 weapon_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
+item_group = pygame.sprite.Group()
 
 
 # initiate the game________________________________________________________________________________
 def start_game():
     global grid, dungeon, player, enemy_spawner, debug
     grid = Grid()
-    dungeon = Dungeon(visible_group, obstacle_group, grid)
+    dungeon = Dungeon(visible_group, obstacle_group, item_group, grid)
     player = Player(visible_group, dungeon.player_start_position, grid, visible_group,
-                    obstacle_group, weapon_group, enemy_group, hud_group)
+                    obstacle_group, weapon_group, enemy_group, hud_group, item_group)
     enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, grid, visible_group,
                                  enemy_group, obstacle_group, weapon_group)
 
@@ -121,6 +122,7 @@ async def main():
             if selection == 'start_game':
                 in_game = True
                 in_main_menu = False
+                pygame.display.flip()
                 start_game()
 
         pygame.display.flip()
