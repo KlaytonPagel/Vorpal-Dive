@@ -15,7 +15,7 @@ from settings_screen import Settings
 # A class to create and manage the player character________________________________________________
 class Player(pygame.sprite.Sprite):
     def __init__(self, group, position, grid, visible_group, obstacle_group,
-                 weapon_group, enemy_group, hud_group, item_group):
+                 weapon_group, enemy_group, hud_group, item_group, interactable_group):
         super().__init__(group)
 
         # Define sprite groups
@@ -25,6 +25,7 @@ class Player(pygame.sprite.Sprite):
         self.enemy_group = enemy_group
         self.hud_group = hud_group
         self.item_group = item_group
+        self.interactable_group = interactable_group
 
         # Player sprite setup
         self.image = pygame.image.load("textures/Player.png").convert_alpha()
@@ -258,15 +259,14 @@ class Player(pygame.sprite.Sprite):
         if self.player_direction.x != 0:
             self.player_x_position += self.player_direction.x * self.player_speed * delta_time
             self.rect.x = round(self.player_x_position)
-            self.check_obstacle_collisions('horizontal')
+            self.check_collisions('horizontal')
         if self.player_direction.y != 0:
             self.player_y_position += self.player_direction.y * self.player_speed * delta_time
             self.rect.y = round(self.player_y_position)
-            self.check_obstacle_collisions('vertical')
+            self.check_collisions('vertical')
         self.get_current_tile()
 
         self.check_enemy_collision()
-        self.check_item_collision()
         self.cool_downs()
 
         # update all projectile and weapon animations
@@ -473,26 +473,38 @@ class Player(pygame.sprite.Sprite):
                 except: pass
 
     # Check for any collisions between the player and obstacles____________________________________
-    def check_obstacle_collisions(self, direction):
+    def check_collisions(self, direction):
         if collision:
             self.get_near_tiles()
 
             # Check obstacle collision
             for sprite in self.near_tile_objects:
-                if direction == 'horizontal':
-                    if self.rect.colliderect(sprite) and self.player_direction.x > 0:
-                        self.player_x_position = sprite.rect.left - tile_size
-                        self.rect.right = sprite.rect.left
-                    elif self.rect.colliderect(sprite) and self.player_direction.x < 0:
-                        self.player_x_position = sprite.rect.right
-                        self.rect.left = sprite.rect.right
-                if direction == 'vertical':
-                    if self.rect.colliderect(sprite) and self.player_direction.y < 0:
-                        self.player_y_position = sprite.rect.bottom
-                        self.rect.top = sprite.rect.bottom
-                    elif self.rect.colliderect(sprite) and self.player_direction.y > 0:
-                        self.player_y_position = sprite.rect.top - (tile_size // 1.5)
-                        self.rect.bottom = sprite.rect.top
+                if sprite.name == 'wall':
+                    if direction == 'horizontal':
+                        if self.rect.colliderect(sprite) and self.player_direction.x > 0:
+                            self.player_x_position = sprite.rect.left - tile_size
+                            self.rect.right = sprite.rect.left
+                        elif self.rect.colliderect(sprite) and self.player_direction.x < 0:
+                            self.player_x_position = sprite.rect.right
+                            self.rect.left = sprite.rect.right
+                    if direction == 'vertical':
+                        if self.rect.colliderect(sprite) and self.player_direction.y < 0:
+                            self.player_y_position = sprite.rect.bottom
+                            self.rect.top = sprite.rect.bottom
+                        elif self.rect.colliderect(sprite) and self.player_direction.y > 0:
+                            self.player_y_position = sprite.rect.top - (tile_size // 1.5)
+                            self.rect.bottom = sprite.rect.top
+
+            for sprite in self.interactable_group:
+                if sprite.name == 'ladder':
+                    if self.rect.colliderect(sprite):
+                        print('ladder')
+                        sprite.kill()
+
+            for sprite in self.item_group:
+                if self.rect.colliderect(sprite):
+                    sprite.kill()
+                    self.inventory.add_item(sprite.item_id)
 
     # check for any collisions between the player and enemies______________________________________
     def check_enemy_collision(self):
@@ -513,19 +525,11 @@ class Player(pygame.sprite.Sprite):
                         self.player_direction = sprite.enemy_direction
                         if self.player_direction.x != 0:
                             self.rect.x += self.player_direction.x * tile_size/2
-                            self.check_obstacle_collisions('horizontal')
+                            self.check_collisions('horizontal')
                             self.player_direction.x = 0
                         if self.player_direction.y != 0:
                             self.rect.y += self.player_direction.y * tile_size/2
-                            self.check_obstacle_collisions('vertical')
+                            self.check_collisions('vertical')
                             self.player_direction.y = 0
                         self.invincible = True
                         self.invincibility_cooldown = time.time()
-
-    def check_item_collision(self):
-        if collision:
-
-            for item in self.item_group:
-                if self.rect.colliderect(item):
-                    self.inventory.add_item(item.item_id)
-                    item.kill()

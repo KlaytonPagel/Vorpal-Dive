@@ -70,15 +70,16 @@ obstacle_group = pygame.sprite.Group()
 weapon_group = pygame.sprite.Group()
 enemy_group = pygame.sprite.Group()
 item_group = pygame.sprite.Group()
+interactable_group = pygame.sprite.Group()
 
 
 # initiate the game________________________________________________________________________________
 def start_game():
     global grid, dungeon, player, enemy_spawner, debug
     grid = Grid()
-    dungeon = Dungeon(visible_group, obstacle_group, item_group, grid)
+    dungeon = Dungeon(visible_group, obstacle_group, item_group, interactable_group, grid)
     player = Player(visible_group, dungeon.player_start_position, grid, visible_group,
-                    obstacle_group, weapon_group, enemy_group, hud_group, item_group)
+                    obstacle_group, weapon_group, enemy_group, hud_group, item_group, interactable_group)
     enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, grid, visible_group,
                                  enemy_group, obstacle_group, weapon_group)
 

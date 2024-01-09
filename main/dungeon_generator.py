@@ -7,14 +7,17 @@ from item_system import Item
 
 # Dungeon class for generating a random dungeon____________________________________________________
 class Dungeon:
-    def __init__(self, visible_group, obstacle_group, item_group, grid):
+    def __init__(self, visible_group, obstacle_group, item_group, interactable_group, grid):
         self.floor_tile_positions = []
         self.wall_tile_positions = {}
         self.wall_tile_sprites = {}
         self.grid = grid
+
         self.visible_group = visible_group
         self.obstacle_group = obstacle_group
         self.item_group = item_group
+        self.interactable_group = interactable_group
+
         self.player_start_position = None
         self.dungeon_level = []
         self.room_centers = []
@@ -22,6 +25,7 @@ class Dungeon:
         self.build_floors()
         self.build_walls()
         self.spawn_artifact()
+        self.spawn_escape_ladder()
 
     # Choose random places within dungeon size and build rooms_____________________________________
     def generate_rooms(self):
@@ -284,7 +288,7 @@ class Dungeon:
 
         # Check the walls situation and apply the correct image
         for position, data in self.wall_tile_positions.items():
-            wall = Tile(position, data[0], (self.visible_group, self.obstacle_group), data[1])
+            wall = Tile(position, data[0], (self.visible_group, self.obstacle_group), data[1], name='wall')
             self.wall_tile_sprites[position] = wall
 
         self.populate_grid_tiles()
@@ -296,10 +300,15 @@ class Dungeon:
     def spawn_artifact(self):
         artifact_image = pygame.image.load('textures/32X32/green_drop.png').convert_alpha()
 
-        room_index = random.randint(0, len(self.room_centers) - 1)
-        if (abs(self.room_centers[room_index][0] - self.player_start_position[0]) < dungeon_width // 2 and
-                abs(self.room_centers[room_index][1] - self.player_start_position[1]) < dungeon_height // 2):
-            self.spawn_artifact()
+        for room in self.room_centers:
+            if (abs(room[0] - self.player_start_position[0]) > dungeon_width // 3 and
+                    abs(room[1] - self.player_start_position[1]) > dungeon_height // 3):
+                artifact = Item((self.visible_group, self.item_group), artifact_image, room, '4', 'artifact')
+                self.grid.fill_grid(artifact.rect.topleft, artifact)
+                return
 
-        else:
-            artifact = Item((self.visible_group, self.item_group), artifact_image, self.room_centers[room_index], '4')
+    def spawn_escape_ladder(self):
+        ladder_image = pygame.image.load('textures/32X32/ladder.png').convert_alpha()
+        ladder_position = (self.room_centers[0][0] - tile_size, self.room_centers[0][1])
+        ladder = Tile(ladder_position, ladder_image, (self.visible_group, self.interactable_group), name='ladder')
+        self.grid.fill_grid(ladder.rect.topleft, ladder)
