@@ -11,7 +11,7 @@ class Enemy(pygame.sprite.Sprite):
         self.image = pygame.image.load("textures/Enemy.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
         self.rect = self.image.get_rect(topleft=position)
-        self.rect = self.rect.inflate(0, -10)
+        self.rect = self.rect.inflate(0, -tile_size // 2)
         self.enemy_direction = pygame.math.Vector2()
 
         # grid tile location set up
@@ -96,16 +96,20 @@ class Enemy(pygame.sprite.Sprite):
             # Check obstacle collision
             for sprite in self.near_tile_objects:
                 if direction == 'horizontal':
+                    # moving right
                     if self.rect.colliderect(sprite) and self.enemy_direction.x > 0:
                         self.rect.right = sprite.rect.left
                         self.position_x, self.position_y = self.rect.center
+                    # moving left
                     elif self.rect.colliderect(sprite) and self.enemy_direction.x < 0:
                         self.rect.left = sprite.rect.right
                         self.position_x, self.position_y = self.rect.center
                 if direction == 'vertical':
+                    # moving up
                     if self.rect.colliderect(sprite) and self.enemy_direction.y < 0:
                         self.rect.top = sprite.rect.bottom
                         self.position_x, self.position_y = self.rect.center
+                    # moving down
                     elif self.rect.colliderect(sprite) and self.enemy_direction.y > 0:
                         self.rect.bottom = sprite.rect.top
                         self.position_x, self.position_y = self.rect.center

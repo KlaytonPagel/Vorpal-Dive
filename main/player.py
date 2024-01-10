@@ -31,7 +31,7 @@ class Player(pygame.sprite.Sprite):
         self.image = pygame.image.load("textures/Player.png").convert_alpha()
         self.image = pygame.transform.scale(self.image, (tile_size, tile_size))
         self.rect = self.image.get_rect(topleft=position)
-        self.rect = self.rect.inflate(0, -20)
+        self.rect = self.rect.inflate(0, -tile_size // 2)
         self.player_x_position = self.rect.x
         self.player_y_position = self.rect.y
         self.position = position
@@ -481,18 +481,22 @@ class Player(pygame.sprite.Sprite):
             for sprite in self.near_tile_objects:
                 if sprite.name == 'wall':
                     if direction == 'horizontal':
+                        # moving right
                         if self.rect.colliderect(sprite) and self.player_direction.x > 0:
                             self.player_x_position = sprite.rect.left - tile_size
                             self.rect.right = sprite.rect.left
+                        # moving left
                         elif self.rect.colliderect(sprite) and self.player_direction.x < 0:
-                            self.player_x_position = sprite.rect.right
+                            self.player_x_position = sprite.rect.right + 2
                             self.rect.left = sprite.rect.right
                     if direction == 'vertical':
+                        # moving up
                         if self.rect.colliderect(sprite) and self.player_direction.y < 0:
-                            self.player_y_position = sprite.rect.bottom
+                            self.player_y_position = sprite.rect.bottom + 2
                             self.rect.top = sprite.rect.bottom
+                        # moving down
                         elif self.rect.colliderect(sprite) and self.player_direction.y > 0:
-                            self.player_y_position = sprite.rect.top - (tile_size // 1.5)
+                            self.player_y_position = sprite.rect.top - (tile_size//2)
                             self.rect.bottom = sprite.rect.top
 
             for sprite in self.interactable_group:
