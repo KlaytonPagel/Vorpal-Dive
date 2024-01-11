@@ -45,6 +45,7 @@ class Dialog:
                         self.clear_dialog()
                     if button.rect.collidepoint(x, y) and action[1] == 'leave':
                         game_variable.clear_game()
+                        game_variable.open_menu()
 
     # Dialog for when the player interacts with the ladder to leave
     def ladder_dialog(self):

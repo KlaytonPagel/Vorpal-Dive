@@ -32,6 +32,9 @@ class GameVariables:
         self.player = None
         self.enemy_spawner = None
         self.debug = None
+        self.menu = None
+
+        self.open_menu()
 
     # reset the game
     def clear_game(self):
@@ -59,6 +62,9 @@ class GameVariables:
 
         self.debug = Text((screen_width - 75, screen_height - 75), str(round(clock.get_fps())), hud_group, 50,
                           (255, 255, 255))
+
+    def open_menu(self):
+        self.menu = main_menu()
 
 
 # Custom Camera Group Setup________________________________________________________________________
@@ -125,7 +131,6 @@ game_variable = GameVariables()
 
 async def main():
     global running, last_frame_time, game_variable
-    menu = main_menu()
 
     while running:
         event_list = pygame.event.get()
@@ -149,7 +154,7 @@ async def main():
             game_variable.dialog.display_dialog(event_list, game_variable)
 
         if game_variable.in_main_menu:
-            selection = menu.draw(event_list)
+            selection = game_variable.menu.draw(event_list)
             if selection == 'start_game':
                 game_variable.in_game = True
                 game_variable.in_main_menu = False
