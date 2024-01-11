@@ -10,8 +10,8 @@ class Dialog:
         self.response = {}
 
     # display the dialog to the user
-    def display_dialog(self, event_list):
-        self.user_input(event_list)
+    def display_dialog(self, event_list, game_variable):
+        self.user_input(event_list, game_variable)
         dialog_box_position = (0, self.screen.get_height() - self.screen.get_height()//3)
         dialog_box_size = (self.screen.get_width(), self.screen.get_height()//3)
         response_box_size = (self.screen.get_width() // 8, self.screen.get_height() // 8)
@@ -35,7 +35,7 @@ class Dialog:
         self.response = {}
 
     # gather all user input for selecting the response option
-    def user_input(self, event_list):
+    def user_input(self, event_list, game_variable):
         for event in event_list:
             if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
                 x, y = event.pos
@@ -43,8 +43,8 @@ class Dialog:
                 for button, action in self.response.items():
                     if button.rect.collidepoint(x, y) and action[1] == 'no':
                         self.clear_dialog()
-                    if button.rect.collidepoint(x, y) and action[1] == 'yes':
-                        print('yes')
+                    if button.rect.collidepoint(x, y) and action[1] == 'leave':
+                        game_variable.clear_game()
 
     # Dialog for when the player interacts with the ladder to leave
     def ladder_dialog(self):
@@ -56,7 +56,7 @@ class Dialog:
         self.dialog.append(text_surface)
         yes_response = Response('yes', (0, self.screen.get_height() - self.screen.get_height()//3))
         no_response = Response('no', yes_response.rect.topleft)
-        self.response[yes_response] = ['first', 'yes']
+        self.response[yes_response] = ['first', 'leave']
         self.response[no_response] = ['second', 'no']
 
 
