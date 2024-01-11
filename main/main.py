@@ -9,6 +9,7 @@ from enemy_spawner import EnemySpawner
 from sprites import Text
 from tile_system import Grid
 from main_menu import MenuScreens
+from dialog_system import Dialog
 
 # start pygame_____________________________________________________________________________________
 pygame.init()
@@ -75,11 +76,12 @@ interactable_group = pygame.sprite.Group()
 
 # initiate the game________________________________________________________________________________
 def start_game():
-    global grid, dungeon, player, enemy_spawner, debug
+    global grid, dungeon, player, enemy_spawner, debug, dialog
     grid = Grid()
+    dialog = Dialog()
     dungeon = Dungeon(visible_group, obstacle_group, item_group, interactable_group, grid)
     player = Player(visible_group, dungeon.player_start_position, grid, visible_group,
-                    obstacle_group, weapon_group, enemy_group, hud_group, item_group, interactable_group)
+                    obstacle_group, weapon_group, enemy_group, hud_group, item_group, interactable_group, dialog)
     enemy_spawner = EnemySpawner(dungeon.floor_tile_positions, grid, visible_group,
                                  enemy_group, obstacle_group, weapon_group)
 
@@ -117,6 +119,7 @@ async def main():
             debug.image = pygame.font.Font(None, 50).render((str(round(clock.get_fps()))), True, (255, 255, 255))
 
             hud_group.custom_draw(screen)
+            dialog.display_dialog(event_list)
 
         if in_main_menu:
             selection = menu.draw(event_list)

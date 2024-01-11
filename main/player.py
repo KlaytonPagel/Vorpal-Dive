@@ -15,7 +15,7 @@ from settings_screen import Settings
 # A class to create and manage the player character________________________________________________
 class Player(pygame.sprite.Sprite):
     def __init__(self, group, position, grid, visible_group, obstacle_group,
-                 weapon_group, enemy_group, hud_group, item_group, interactable_group):
+                 weapon_group, enemy_group, hud_group, item_group, interactable_group, dialog):
         super().__init__(group)
 
         # Define sprite groups
@@ -81,6 +81,9 @@ class Player(pygame.sprite.Sprite):
 
         # create the players weapon
         self.current_weapon = self.create_weapon()
+
+        # initialize the dialog system
+        self.dialog = dialog
 
     # Load all player stats and variables from JSON file___________________________________________
     def load_player_data(self):
@@ -502,8 +505,7 @@ class Player(pygame.sprite.Sprite):
             for sprite in self.interactable_group:
                 if sprite.name == 'ladder':
                     if self.rect.colliderect(sprite):
-                        print('ladder')
-                        sprite.kill()
+                        self.dialog.ladder_dialog()
 
             for sprite in self.item_group:
                 if self.rect.colliderect(sprite):
