@@ -85,6 +85,10 @@ class Player(pygame.sprite.Sprite):
         # initialize the dialog system
         self.dialog = dialog
 
+        # cool down for interacting with things
+        self.interacted = False
+        self.interactable_cool_down = pygame.time.get_ticks()
+
     # Load all player stats and variables from JSON file___________________________________________
     def load_player_data(self):
         if sys.platform == 'emscripten':
@@ -429,6 +433,9 @@ class Player(pygame.sprite.Sprite):
             self.inventory.save_inventory()
             self.auto_save_timer = pygame.time.get_ticks()
 
+        if self.interacted and current_time - self.interactable_cool_down > 2000:
+            self.interacted = False
+
     # adjust the players maximum health____________________________________________________________
     def adjust_max_health(self, amount):
         self.max_health += amount
@@ -480,37 +487,40 @@ class Player(pygame.sprite.Sprite):
         if collision:
             self.get_near_tiles()
 
-            # Check obstacle collision
-            for sprite in self.near_tile_objects:
-                if sprite.name == 'wall':
-                    if direction == 'horizontal':
-                        # moving right
-                        if self.rect.colliderect(sprite) and self.player_direction.x > 0:
-                            self.player_x_position = sprite.rect.left - tile_size
-                            self.rect.right = sprite.rect.left
-                        # moving left
-                        elif self.rect.colliderect(sprite) and self.player_direction.x < 0:
-                            self.player_x_position = sprite.rect.right + 2
-                            self.rect.left = sprite.rect.right
-                    if direction == 'vertical':
-                        # moving up
-                        if self.rect.colliderect(sprite) and self.player_direction.y < 0:
-                            self.player_y_position = sprite.rect.bottom + 2
-                            self.rect.top = sprite.rect.bottom
-                        # moving down
-                        elif self.rect.colliderect(sprite) and self.player_direction.y > 0:
-                            self.player_y_position = sprite.rect.top - (tile_size//2)
-                            self.rect.bottom = sprite.rect.top
-
+            # check for escape ladder collision
             for sprite in self.interactable_group:
-                if sprite.name == 'ladder':
+                if sprite.name == 'ladder' and not self.interacted:
                     if self.rect.colliderect(sprite):
                         self.dialog.ladder_dialog()
+                        self.interacted = True
+                        self.interactable_cool_down = pygame.time.get_ticks()
 
+            # check for item collision
             for sprite in self.item_group:
                 if self.rect.colliderect(sprite):
                     sprite.kill()
                     self.inventory.add_item(sprite.item_id)
+
+            # Check obstacle collision
+            for sprite in self.near_tile_objects:
+                if direction == 'horizontal':
+                    # moving right
+                    if self.rect.colliderect(sprite) and self.player_direction.x > 0:
+                        self.player_x_position = sprite.rect.left - tile_size
+                        self.rect.right = sprite.rect.left
+                    # moving left
+                    elif self.rect.colliderect(sprite) and self.player_direction.x < 0:
+                        self.player_x_position = sprite.rect.right + 2
+                        self.rect.left = sprite.rect.right
+                if direction == 'vertical':
+                    # moving up
+                    if self.rect.colliderect(sprite) and self.player_direction.y < 0:
+                        self.player_y_position = sprite.rect.bottom + 2
+                        self.rect.top = sprite.rect.bottom
+                    # moving down
+                    elif self.rect.colliderect(sprite) and self.player_direction.y > 0:
+                        self.player_y_position = sprite.rect.top - (tile_size//2)
+                        self.rect.bottom = sprite.rect.top
 
     # check for any collisions between the player and enemies______________________________________
     def check_enemy_collision(self):
